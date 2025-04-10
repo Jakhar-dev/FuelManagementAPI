@@ -2,7 +2,7 @@
 {
     public class PriceUpdateViewModel
     {
-        public string Category { get; set; }
+        public int CategoryId { get; set; }
         public DateTime Date { get; set; }
 
         public List<PriceProductEntry> Products { get; set; }

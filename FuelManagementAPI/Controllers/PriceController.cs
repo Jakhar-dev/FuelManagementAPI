@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FuelManagementAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/price")]
     [ApiController]
     public class PriceController : Controller
     {
@@ -55,18 +55,25 @@ namespace FuelManagementAPI.Controllers
         [HttpPost("update-prices")]
         public async Task<IActionResult> UpdatePrices([FromBody] PriceUpdateViewModel model)
         {
-            if (model == null || string.IsNullOrEmpty(model.Category) || model.Products == null || model.Products.Count == 0)
-            {
+            if (model == null || model.CategoryId == 0 || model.Products == null || model.Products.Count == 0)
                 return BadRequest("Invalid request data.");
-            }
 
-            var result = await _priceRepository.UpdateProductPricesAsync(model);
-            if (!result)
+            model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
+
+            try
             {
-                return NotFound("No matching products found to update.");
-            }
+                var result = await _priceRepository.UpdateProductPricesAsync(model);
 
-            return Ok("Prices updated successfully.");
+                if (!result)
+                    return NotFound("No matching products found to update.");
+
+                return Ok("Prices updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("🔥 CONTROLLER ERROR: " + ex.Message);
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
         }
 
     }

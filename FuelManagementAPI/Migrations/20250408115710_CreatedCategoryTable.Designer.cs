@@ -3,6 +3,7 @@ using System;
 using FuelManagementAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FuelManagementAPI.Migrations
 {
     [DbContext(typeof(FuelDbContext))]
-    partial class FuelDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408115710_CreatedCategoryTable")]
+    partial class CreatedCategoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -401,7 +404,7 @@ namespace FuelManagementAPI.Migrations
             modelBuilder.Entity("FuelManagementAPI.Models.Product", b =>
                 {
                     b.HasOne("FuelManagementAPI.Models.ProductCategory", "ProductCategory")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -422,6 +425,11 @@ namespace FuelManagementAPI.Migrations
             modelBuilder.Entity("FuelManagementAPI.Models.LubeEntry", b =>
                 {
                     b.Navigation("Sales");
+                });
+
+            modelBuilder.Entity("FuelManagementAPI.Models.ProductCategory", b =>
+                {
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

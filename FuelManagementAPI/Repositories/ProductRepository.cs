@@ -36,23 +36,24 @@ namespace FuelManagementAPI.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Product>> GetProductsByCategoryAsync(string category)
-        {
-            return await _context.Products
-                .Where(p => p.ProductCategory == category)
-                .ToListAsync();
-        }  
+       
         public Task<List<Product>> GetProductsAsync()
         {
             return _context.Products.ToListAsync();
         }
 
-        public async Task<List<string>> GetCategoriesAsync()
+        public async Task<List<Product>> GetProductsByCategoryAsync(int categoryId)
         {
             return await _context.Products
-                .Select(p => p.ProductCategory)
-                .Distinct()
+                .Include(p => p.ProductCategory)
+                .Where(p => p.CategoryId == categoryId)
                 .ToListAsync();
         }
+        public async Task<ProductCategory?> GetCategoryByNameAsync(string categoryName)
+        {
+            return await _context.ProductCategories
+                .FirstOrDefaultAsync(c => c.CategoryName.ToLower() == categoryName.ToLower());
+        }
+
     }
 }

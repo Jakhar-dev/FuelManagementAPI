@@ -35,7 +35,10 @@ namespace FuelManagementAPI.Repositories
 
         public async Task<List<FuelEntry>> GetAllAsync()
         {
-            return await _FuelEntryContext.FuelEntries.Include(f => f.Sales).ToListAsync();
+            return await _FuelEntryContext.FuelEntries
+                .Include(f => f.Sales)
+                .ThenInclude(s => s.Product)
+                .ToListAsync();
         }
 
         // Get previous reading from FuelEntry

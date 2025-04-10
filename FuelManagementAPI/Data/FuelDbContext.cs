@@ -17,6 +17,7 @@ namespace FuelManagementAPI.Data
         public DbSet<Price> Prices { get; set; }
         public DbSet<FuelEntry> FuelEntries { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }   
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

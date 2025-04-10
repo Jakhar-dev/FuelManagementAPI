@@ -35,58 +35,67 @@ namespace FuelManagementAPI.Repositories
         }
         public async Task<bool> UpdateProductPricesAsync(PriceUpdateViewModel model)
         {
-            var submittedProductIds = model.Products.Select(p => p.ProductId).ToList();
-
-            // Step 1: Remove existing prices for selected products on the same date
-            var existingPrices = await _context.Prices
-                .Where(p => submittedProductIds.Contains(p.ProductId) && p.Date.Date == model.Date.Date)
-                .ToListAsync();
-
-            if (existingPrices.Any())
+            try
             {
-                _context.Prices.RemoveRange(existingPrices);
-            }
+                var submittedProductIds = model.Products.Select(p => p.ProductId).ToList();
 
-            // Step 2: Save new prices for submitted products
-            var submittedPriceEntries = model.Products.Select(p => new Price
-            {
-                ProductId = p.ProductId,
-                SellingPrice = p.Price,
-                Date = model.Date
-            }).ToList();
-
-            await _context.Prices.AddRangeAsync(submittedPriceEntries);
-
-            // Step 3: Autofill prices for other products in the same category that weren’t submitted
-            var allProductIdsInCategory = await _context.Products
-                .Where(p => p.ProductCategory == model.Category)
-                .Select(p => p.ProductId)
-                .ToListAsync();
-
-            var missingProductIds = allProductIdsInCategory.Except(submittedProductIds).ToList();
-
-            if (missingProductIds.Any())
-            {
-                // Fetch last known prices before the selected date
-                var lastKnownPrices = await _context.Prices
-                    .Where(p => missingProductIds.Contains(p.ProductId) && p.Date < model.Date)
-                    .GroupBy(p => p.ProductId)
-                    .Select(g => g.OrderByDescending(p => p.Date).FirstOrDefault())
+                // Step 1: Remove existing prices for submitted products on the same date
+                var existingPrices = await _context.Prices
+                    .Where(p => submittedProductIds.Contains(p.ProductId) && p.Date.Date == model.Date.Date)
                     .ToListAsync();
 
-                var autoFilledPrices = lastKnownPrices.Select(p => new Price
+                if (existingPrices.Any())
+                {
+                    _context.Prices.RemoveRange(existingPrices);
+                }
+
+                // Step 2: Save new prices for submitted products
+                var submittedPriceEntries = model.Products.Select(p => new Price
                 {
                     ProductId = p.ProductId,
-                    SellingPrice = p.SellingPrice,
+                    SellingPrice = p.Price,
                     Date = model.Date
-                });
+                }).ToList();
 
-                await _context.Prices.AddRangeAsync(autoFilledPrices);
+                await _context.Prices.AddRangeAsync(submittedPriceEntries);
+
+                // Step 3: Autofill prices for other products in the same category that weren’t submitted
+                var allProductIdsInCategory = await _context.Products
+                    .Where(p => p.CategoryId == model.CategoryId) // ✅ CORRECTED
+                    .Select(p => p.ProductId)
+                    .ToListAsync();
+
+                var missingProductIds = allProductIdsInCategory.Except(submittedProductIds).ToList();
+
+                if (missingProductIds.Any())
+                {
+                    var lastKnownPrices = await _context.Prices
+                        .Where(p => missingProductIds.Contains(p.ProductId) && p.Date < model.Date)
+                        .GroupBy(p => p.ProductId)
+                        .Select(g => g.OrderByDescending(p => p.Date).FirstOrDefault())
+                        .ToListAsync();
+
+                    var autoFilledPrices = lastKnownPrices.Select(p => new Price
+                    {
+                        ProductId = p.ProductId,
+                        SellingPrice = p.SellingPrice,
+                        Date = model.Date
+                    });
+
+                    await _context.Prices.AddRangeAsync(autoFilledPrices);
+                }
+
+                await _context.SaveChangesAsync();
+                return true;
             }
-
-            await _context.SaveChangesAsync();
-            return true;
+            catch (Exception ex)
+            {
+                Console.WriteLine("🔥 ERROR in UpdateProductPricesAsync: " + ex.Message);
+                throw; // rethrow to let controller return 500 with log
+            }
         }
+
+
 
     }
 }

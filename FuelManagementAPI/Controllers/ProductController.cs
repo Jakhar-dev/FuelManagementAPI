@@ -2,6 +2,7 @@
 using FuelManagementAPI.Models;
 using FuelManagementAPI.ViewModels;
 using FuelManagementAPI.Repositories.IRepositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementAPI.Controllers
 {
@@ -17,28 +18,28 @@ namespace FuelManagementAPI.Controllers
         }
 
         // GET: api/products/categories
-        [HttpGet("categories")]
-        public async Task<ActionResult<IEnumerable<string>>> GetCategories()
+        [HttpGet("GetProducts")]
+        public async Task<ActionResult<IEnumerable<string>>> GetProducts()
         {
             var products = await _productRepo.GetProductsAsync();
-            var categories = products.Select(p => p.ProductCategory).Distinct().ToList();
-            return Ok(categories);
-        }
-        // GET: api/products/by-category?category=Fuel
-        [HttpGet("by-category")]
-        public async Task<IActionResult> GetProductsByCategory([FromQuery] string category)
-        {
-            if (string.IsNullOrWhiteSpace(category))
-                return BadRequest("Category is required.");
+            var ProductName = products.Select(p => p.ProductName).Distinct().ToList();
+            return Ok(ProductName);
+        }     
 
-            var products = await _productRepo.GetProductsByCategoryAsync(category);
+        [HttpGet("by-category")]
+        public async Task<IActionResult> GetProductsByCategory([FromQuery] int categoryId)
+        {
+            if (categoryId <= 0)
+                return BadRequest("Valid categoryId is required.");
+
+            var products = await _productRepo.GetProductsByCategoryAsync(categoryId);
             return Ok(products);
         }
         // GET: api/products/fuel-products
         [HttpGet("fuel-products")]
         public async Task<IActionResult> GetFuelProducts()
         {
-            var fuelProducts = await _productRepo.GetProductsByCategoryAsync("Fuel");
+            var fuelProducts = await _productRepo.GetProductsByCategoryAsync(1);
             return Ok(fuelProducts);
         }
 
@@ -46,12 +47,12 @@ namespace FuelManagementAPI.Controllers
         [HttpGet("lube-products")]
         public async Task<IActionResult> GetLubeProducts()
         {
-            var lubeProducts = await _productRepo.GetProductsByCategoryAsync("Lube");
+            var lubeProducts = await _productRepo.GetProductsByCategoryAsync(2);
             return Ok(lubeProducts);
         }
 
         // POST: api/products/add
-        [HttpPost("add")]
+        [HttpPost("add-product")]
         public async Task<IActionResult> AddProduct([FromBody] List<ProductViewModel> productVms)
         {
             if (productVms == null || !productVms.Any())
@@ -68,11 +69,22 @@ namespace FuelManagementAPI.Controllers
                     continue;
                 }
 
+                // Find category by name
+                var category = await _productRepo.GetCategoryByNameAsync(vm.ProductCategory);
+
+                if (category == null)
+                {
+                    validationErrors.Add($"Category '{vm.ProductCategory}' not found.");
+                    continue;
+                }
+
+
                 var product = new Product
                 {
-                    ProductCategory = vm.ProductCategory,
                     ProductName = vm.ProductName,
                     ProductDescription = vm.ProductDescription,
+                    ProductCategory = category,
+                    Date = DateTime.UtcNow
                 };
 
                 try
@@ -86,7 +98,13 @@ namespace FuelManagementAPI.Controllers
                 }
             }
 
-            return Ok(new { products = addedProducts, errors = validationErrors });
+            return Ok(new
+            {
+                products = addedProducts,
+                errors = validationErrors
+            });
         }
+
+
     }
 }

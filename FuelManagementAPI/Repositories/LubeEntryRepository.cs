@@ -28,7 +28,10 @@ namespace FuelManagementAPI.Repositories
 
         public async Task<List<LubeEntry>> GetAllAsync()
         {
-            return await _context.LubeEntries.Include(l => l.Sales).ToListAsync();
+            return await _context.LubeEntries
+                .Include(l => l.Sales)
+                .ThenInclude(s => s.Product)
+                .ToListAsync();
         }
 
         public Task UpdateAsync(LubeSale entity)
