@@ -25,4 +25,10 @@ public class FuelSaleRepository : Repository<FuelSale>, IFuelSalesRepository
     {
         await _context.FuelSales.AddAsync(sale);
     }
+
+    public async Task DeleteAsync(FuelSale fuelSale)
+    {
+        _context.FuelSales.Remove(fuelSale);
+        await _context.SaveChangesAsync();
+    }
 }

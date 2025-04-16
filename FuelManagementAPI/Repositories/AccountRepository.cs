@@ -21,7 +21,12 @@ public class AccountRepository : Repository<Account>, IAccountRepository
         return accounts;
     }
 
-
+    public async Task<List<Account>> GetAllWithTransactionsAsync()
+    {
+        return await _context.Accounts
+            .Include(a => a.Transactions) // 👈 This ensures EF loads related transactions
+            .ToListAsync();
+    }
     // Get All Accounts
     public async Task<List<Account>> GetAccountsAsync()
     {

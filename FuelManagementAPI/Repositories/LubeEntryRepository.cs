@@ -26,6 +26,11 @@ namespace FuelManagementAPI.Repositories
             throw new NotImplementedException();
         }
 
+        public Task DeleteAsync(LubeEntry lubeEntry)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<List<LubeEntry>> GetAllAsync()
         {
             return await _context.LubeEntries

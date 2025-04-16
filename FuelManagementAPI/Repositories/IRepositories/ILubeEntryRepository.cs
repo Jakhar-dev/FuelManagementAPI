@@ -6,6 +6,7 @@ namespace FuelManagementAPI.Repositories.IRepositories
     {
         Task<List<LubeEntry>> GetAllAsync();
         Task<LubeEntry> AddAsync(LubeEntry lubeEntry);
+        Task DeleteAsync(LubeEntry lubeEntry);
 
     }
 }

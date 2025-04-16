@@ -95,5 +95,17 @@ namespace FuelManagementAPI.Controllers
             var lastSale = await _FuelSalesRepository.GetLastSaleForProductAsync(productId);
             return Ok(new { previousReading = lastSale?.CurrentReading ?? 0 });
         }
+
+        [HttpDelete("fuel/{id}")]
+        public async Task<IActionResult> DeleteFuelSale(int id)
+        {
+            var sale = await _FuelSalesRepository.GetByIdAsync(id);
+            if (sale == null)
+                return NotFound();
+
+            await _FuelSalesRepository.DeleteAsync(sale);
+            return NoContent();
+        }
+
     }
 }

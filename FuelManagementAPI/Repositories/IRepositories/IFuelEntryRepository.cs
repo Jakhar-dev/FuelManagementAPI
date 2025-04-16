@@ -11,5 +11,6 @@ namespace FuelManagementAPI.Repositories
         Task<Decimal> GetPreviousReadingAsync(int ProductId, DateTime entryDate);
         Task<List<FuelSale>> GetFuelSalesByDateAsync(DateTime date);
         Task<FuelEntry> GetFuelEntryByDateAsync(DateTime date);
+        Task DeleteAsync(FuelEntry fuelEntry);
     }
 }

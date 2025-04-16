@@ -8,10 +8,12 @@ using Microsoft.EntityFrameworkCore;
 public class AccountController : ControllerBase
 {
     private readonly IAccountRepository _accountRepo;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public AccountController(IAccountRepository AccountRepository)
+    public AccountController(IAccountRepository AccountRepository, ITransactionRepository transactionRepository)
     {
         _accountRepo = AccountRepository;
+        _transactionRepository = transactionRepository;
     }
 
     // Create Account
@@ -75,4 +77,40 @@ public class AccountController : ControllerBase
         var addedTransaction = await _accountRepo.AddTransactionAsync(transaction);
         return Ok(addedTransaction);
     }
+
+    [HttpGet("get-transaction")]
+    public async Task<ActionResult> GetAllTransaction()
+    {
+        var accounts = await _accountRepo.GetAllWithTransactionsAsync();
+
+        var result = accounts
+            .Where(a => a.Transactions != null && a.Transactions.Any())
+            .SelectMany(a => a.Transactions.Select(t => new AccountTransactionViewModel
+            {
+                TransactionId = t.TransactionId,
+                AccountId = a.AccountId,
+                CustomerName = a.CustomerName, // 👈 map customer name from Account
+                Amount = (decimal)t.Amount,
+                TransactionType = t.TransactionType,
+                Description = t.Description,
+                TransactionDate = t.TransactionDate
+            }))
+            .ToList();
+
+        return Ok(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTransaction(int id)
+    {
+        var transaction = await _transactionRepository.GetByIdAsync(id);
+        if (transaction == null)
+        {
+            return NotFound();
+        }
+
+        await _transactionRepository.DeleteAsync(transaction);
+        return NoContent();
+    }
+
 }

@@ -34,9 +34,11 @@ builder.Services.AddScoped<IAttendantRepository, AttendantRepository>();
 builder.Services.AddScoped<IFuelEntryRepository, FuelEntryRepository>();
 builder.Services.AddScoped<IFuelSalesRepository, FuelSaleRepository>();
 builder.Services.AddScoped<ILubeEntryRepository, LubeEntryRepository>();
+builder.Services.AddScoped<ILubeSalesRepository, LubeSalesRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPriceRepository, PriceRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddCors(options =>

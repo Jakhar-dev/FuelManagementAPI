@@ -9,10 +9,12 @@ using Newtonsoft.Json;
 public class LubeSalesController : ControllerBase
 {
     private readonly ILubeEntryRepository _repository;
+    private readonly ILubeSalesRepository _salesRepository;
 
-    public LubeSalesController(ILubeEntryRepository repository)
+    public LubeSalesController(ILubeEntryRepository repository, ILubeSalesRepository salesRepository)
     {
         _repository = repository;
+        _salesRepository = salesRepository;
     }
 
     [HttpPost("add")]
@@ -42,11 +44,30 @@ public class LubeSalesController : ControllerBase
         }
     }
 
-
     [HttpGet("all")]
     public async Task<IActionResult> GetAllLubeSales()
     {
         var entries = await _repository.GetAllAsync();
         return Ok(entries);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteLubeSale(int id)
+    {
+        try
+        {
+            var sale = await _salesRepository.GetByIdAsync(id);
+            if (sale == null)
+                return NotFound();
+
+            await _salesRepository.DeleteAsync(sale);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error deleting lube sale: {ex.Message}");
+        }
+    }
+
+
 }

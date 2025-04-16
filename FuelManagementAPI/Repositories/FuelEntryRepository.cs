@@ -75,5 +75,10 @@ namespace FuelManagementAPI.Repositories
                 .Include(e => e.Sales)
                 .FirstOrDefaultAsync(e => e.Date.Date == date.Date);
         }
+
+        public Task DeleteAsync(FuelEntry fuelEntry)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
