@@ -27,8 +27,28 @@ namespace FuelManagementAPI.Controllers
         {
             var Price = await _priceRepository.GetByIdAsync(id);
             if (Price == null) return NotFound();
-            return Ok(Price);
+            return Ok(new {sellingPrice = Price.SellingPrice});
         }
+
+        [HttpGet("price-by-product-and-date")]
+        public async Task<IActionResult> GetPriceByProductAndDate([FromQuery] int productId, [FromQuery] DateTime date)
+        {
+            try
+            {
+                var price = await _priceRepository.GetLatestPriceForProductBeforeDate(productId, date);
+
+                if (price == null)
+                    return Ok(new { sellingPrice = 0 }); // Instead of NotFound
+
+                return Ok(new { sellingPrice = price.SellingPrice });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("🔥 Error fetching price: " + ex.Message);
+                return StatusCode(500, "Error fetching price: " + ex.Message);
+            }
+        }
+
 
         [HttpPost]
         public async Task<ActionResult> AddPrice(Price Price)

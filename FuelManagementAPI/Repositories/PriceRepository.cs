@@ -24,9 +24,17 @@ namespace FuelManagementAPI.Repositories
             throw new NotImplementedException();
         }
 
-        public Price Get(int id)
+        public async Task<Price> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Prices.FirstOrDefaultAsync(p => p.PriceId == id);
+        }
+
+        public async Task<Price> GetLatestPriceForProductBeforeDate(int productId, DateTime date)
+        {
+            return await _context.Prices
+                .Where(p => p.ProductId == productId && p.Date != null && p.Date <= date)
+                .OrderByDescending(p => p.Date)
+                .FirstOrDefaultAsync();
         }
 
         public Price Update(Price price)
