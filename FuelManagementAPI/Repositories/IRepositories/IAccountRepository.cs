@@ -10,5 +10,6 @@ namespace FuelManagementAPI.Repositories.IRepositories
         Task<AccountTransaction> AddTransactionAsync(AccountTransaction transaction);       
         Task<IEnumerable<Account>> CreateAccountsAsync(IEnumerable<Account> accounts);
         Task<List<Account>> GetAllWithTransactionsAsync();
+        Task AddMultipleTransactionsAsync(List<AccountTransaction> transactions);
     }
 }

@@ -10,6 +10,7 @@ namespace FuelManagementAPI.Repositories.IRepositories
         Task AddProductsAsync(IEnumerable<Product> products); // For bulk operations
         Task<List<Product>> GetProductsByCategoryAsync(int categoryId);
         Task<ProductCategory?> GetCategoryByNameAsync(string categoryName);
+        Task<bool> ProductExistsAsync(string productName);
 
 
     }

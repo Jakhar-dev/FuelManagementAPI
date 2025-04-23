@@ -31,7 +31,8 @@ public class LubeSalesController : ControllerBase
                 {
                     ProductId = s.ProductId,
                     Quantity = s.Quantity,
-                    Price = s.Price
+                    Price = s.Price,
+                    Amount = s.Quantity * s.Price
                 }).ToList()
             };
 

@@ -156,6 +156,9 @@ namespace FuelManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FuelSaleId"));
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
                     b.Property<decimal>("CurrentReading")
                         .HasColumnType("numeric");
 
@@ -170,6 +173,9 @@ namespace FuelManagementAPI.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("SaleQuantity")
+                        .HasColumnType("numeric");
 
                     b.Property<decimal>("Testing")
                         .HasColumnType("numeric");
@@ -206,6 +212,9 @@ namespace FuelManagementAPI.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LubeId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
 
                     b.Property<int>("LubeEntryId")
                         .HasColumnType("integer");

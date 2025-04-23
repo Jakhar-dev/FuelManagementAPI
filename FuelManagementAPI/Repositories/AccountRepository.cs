@@ -55,4 +55,10 @@ public class AccountRepository : Repository<Account>, IAccountRepository
         return transaction;
     }
 
+    public async Task AddMultipleTransactionsAsync(List<AccountTransaction> transactions)
+    {
+        await _context.AccountTransactions.AddRangeAsync(transactions);
+        await _context.SaveChangesAsync();
+    }
+
 }

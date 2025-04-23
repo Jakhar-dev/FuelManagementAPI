@@ -6,6 +6,6 @@ namespace FuelManagementAPI.Repositories.IRepositories
     {
         Task<FuelSale?> GetLastSaleForProductAsync(int productId);
         Task AddFuelSaleAsync(FuelSale sale);
-        Task DeleteAsync(FuelSale fuelSale);
+        Task DeleteAsync(FuelSale fuelSale);       
     }
 }

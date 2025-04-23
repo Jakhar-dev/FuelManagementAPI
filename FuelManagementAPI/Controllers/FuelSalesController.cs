@@ -12,27 +12,39 @@ namespace FuelManagementAPI.Controllers
     [EnableCors("AllowLocalhost")]
     public class FuelSalesController : Controller
     {
-        private readonly IFuelEntryRepository _FuelEntryRepository;
-        private readonly IFuelSalesRepository _FuelSalesRepository;
+        private readonly IFuelEntryRepository _fuelEntryRepository;
+        private readonly IFuelSalesRepository _fuelSalesRepository;
 
         public FuelSalesController(IFuelEntryRepository fuelEntryRepository, IFuelSalesRepository fuelSalesRepository)
         {
-            _FuelEntryRepository = fuelEntryRepository;
-            _FuelSalesRepository = fuelSalesRepository;
+            _fuelEntryRepository = fuelEntryRepository;
+            _fuelSalesRepository = fuelSalesRepository;
         }
 
         [HttpGet("all")]
         public async Task<IActionResult> GetFuelSales()
         {
-            return Ok(await _FuelEntryRepository.GetAllAsync());
+            try
+            {
+                var fuelSales = await _fuelEntryRepository.GetAllAsync();
+                return Ok(fuelSales);
+            }
+            catch (Exception ex)
+            {
+                // Log it properly in production
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<FuelSale>> GetFuelSales(int id)
+        public async Task<IActionResult> GetFuelSaleById(int id)
         {
-            var FuelSales = await _FuelEntryRepository.GetByIdAsync(id);
-            if (FuelSales == null) return NotFound();
-            return Ok(FuelSales);
+            var sale = await _fuelEntryRepository.GetByIdAsync(id);
+            if (sale == null)
+                return NotFound();
+
+            return Ok(sale);
         }
 
         [HttpPost("add")]
@@ -40,6 +52,7 @@ namespace FuelManagementAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
             try
             {
                 var fuelEntry = new FuelEntry
@@ -51,61 +64,62 @@ namespace FuelManagementAPI.Controllers
                         PreviousReading = s.PreviousReading,
                         CurrentReading = s.CurrentReading,
                         Testing = s.Testing,
-                        Price = s.Price
+                        SaleQuantity = (s.CurrentReading - s.PreviousReading - s.Testing),
+                        Price = s.Price,
+                        Amount = (s.CurrentReading - s.PreviousReading - s.Testing) * s.Price
                     }).ToList()
                 };
-           
-            var addedEntry = await _FuelEntryRepository.AddAsync(fuelEntry);
-            return Ok(addedEntry);
+
+                var addedEntry = await _fuelEntryRepository.AddAsync(fuelEntry);
+                return Ok(addedEntry);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.ToString());
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateFuelSales(int id, FuelEntry FuelEntry)
+        public async Task<IActionResult> UpdateFuelSales(int id, [FromBody] FuelEntry fuelEntry)
         {
-            if (id != FuelEntry.FuelEntryId) return BadRequest();
-            await _FuelEntryRepository.UpdateAsync(FuelEntry);
+            if (id != fuelEntry.FuelEntryId)
+                return BadRequest("ID mismatch.");
+
+            await _fuelEntryRepository.UpdateAsync(fuelEntry);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteFuelSales(int id)
+        public async Task<IActionResult> DeleteFuelSales(int id)
         {
-            await _FuelEntryRepository.DeleteAsync(id);
+            await _fuelEntryRepository.DeleteAsync(id);
             return NoContent();
         }
 
-        // FuelSalesController.cs
-        //[HttpGet("previous-reading")]
-        //public async Task<IActionResult> GetPreviousReading(
-        // [FromQuery] int productId,
-        // [FromQuery] DateTime entryDate)
-        //{
-        //    var previousReading = await _FuelEntryRepository.GetPreviousReadingAsync(productId, entryDate);
-        //    return Ok(previousReading);
-        //}
+        [HttpGet("check-duplicate")]
+        public async Task<IActionResult> CheckDuplicateSale([FromQuery] int productId, [FromQuery] DateTime date)
+        {
+            var exists = await _fuelEntryRepository.SaleExistsAsync(productId, date);
+            return Ok(new { exists });
+        }
 
         [HttpGet("previous-reading")]
         public async Task<IActionResult> GetPreviousReading([FromQuery] int productId)
         {
-            var lastSale = await _FuelSalesRepository.GetLastSaleForProductAsync(productId);
-            return Ok(new { previousReading = lastSale?.CurrentReading ?? 0 });
+            var lastSale = await _fuelSalesRepository.GetLastSaleForProductAsync(productId);
+            var previousReading = lastSale?.CurrentReading ?? 0;
+            return Ok(new { previousReading });
         }
 
         [HttpDelete("fuel/{id}")]
-        public async Task<IActionResult> DeleteFuelSale(int id)
+        public async Task<IActionResult> DeleteSingleFuelSale(int id)
         {
-            var sale = await _FuelSalesRepository.GetByIdAsync(id);
+            var sale = await _fuelSalesRepository.GetByIdAsync(id);
             if (sale == null)
                 return NotFound();
 
-            await _FuelSalesRepository.DeleteAsync(sale);
+            await _fuelSalesRepository.DeleteAsync(sale);
             return NoContent();
         }
-
     }
 }

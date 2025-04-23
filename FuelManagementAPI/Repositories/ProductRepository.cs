@@ -35,7 +35,6 @@ namespace FuelManagementAPI.Repositories
                 .Where(s => s.ProductId == id)
                 .ToListAsync();
         }
-
        
         public Task<List<Product>> GetProductsAsync()
         {
@@ -54,6 +53,13 @@ namespace FuelManagementAPI.Repositories
             return await _context.ProductCategories
                 .FirstOrDefaultAsync(c => c.CategoryName.ToLower() == categoryName.ToLower());
         }
+        public async Task<bool> ProductExistsAsync(string productName)
+        {
+            if (string.IsNullOrWhiteSpace(productName))
+                return false;
 
+            return await _context.Products
+                .AnyAsync(p => p.ProductName.ToLower() == productName.Trim().ToLower());
+        }
     }
 }

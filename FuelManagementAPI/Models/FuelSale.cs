@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FuelManagementAPI.Models
 {
@@ -13,10 +14,11 @@ namespace FuelManagementAPI.Models
         public decimal PreviousReading { get; set; } = 0;
         public decimal CurrentReading { get; set; }
         public decimal Testing { get; set; }
-        public decimal SaleQuantity => CurrentReading - PreviousReading - Testing;
+        public decimal SaleQuantity { get; set; }
         public decimal Price { get; set; }
-        public decimal Amount => SaleQuantity * Price;
+        public decimal Amount { get; set; }
         public int FuelEntryId { get; set; }
+        [JsonIgnore]
         public FuelEntry? FuelEntry { get; set; }
     }
 }

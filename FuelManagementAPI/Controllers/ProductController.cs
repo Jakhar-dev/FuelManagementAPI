@@ -2,7 +2,6 @@
 using FuelManagementAPI.Models;
 using FuelManagementAPI.ViewModels;
 using FuelManagementAPI.Repositories.IRepositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementAPI.Controllers
 {
@@ -10,87 +9,99 @@ namespace FuelManagementAPI.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _productRepo;
+        private readonly IProductRepository _productRepository;
 
-        public ProductsController(IProductRepository productRepo)
+        public ProductsController(IProductRepository productRepository)
         {
-            _productRepo = productRepo;
+            _productRepository = productRepository;
         }
 
-        // GET: api/products/categories
+        // GET: api/products/GetProducts
         [HttpGet("GetProducts")]
-        public async Task<ActionResult<IEnumerable<string>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<string>>> GetProductsAsync()
         {
-            var products = await _productRepo.GetProductsAsync();
-            var ProductName = products.Select(p => p.ProductName).Distinct().ToList();
-            return Ok(ProductName);
-        }     
+            var products = await _productRepository.GetProductsAsync();
+            var productNames = products
+                .Select(p => p.ProductName.Trim())
+                .Distinct()
+                .ToList();
 
+            return Ok(productNames);
+        }
+
+        // GET: api/products/by-category?categoryId=1
         [HttpGet("by-category")]
-        public async Task<IActionResult> GetProductsByCategory([FromQuery] int categoryId)
+        public async Task<IActionResult> GetProductsByCategoryAsync([FromQuery] int categoryId)
         {
             if (categoryId <= 0)
-                return BadRequest("Valid categoryId is required.");
+                return BadRequest("A valid categoryId must be provided.");
 
-            var products = await _productRepo.GetProductsByCategoryAsync(categoryId);
+            var products = await _productRepository.GetProductsByCategoryAsync(categoryId);
             return Ok(products);
         }
+
         // GET: api/products/fuel-products
         [HttpGet("fuel-products")]
-        public async Task<IActionResult> GetFuelProducts()
+        public async Task<IActionResult> GetFuelProductsAsync()
         {
-            var fuelProducts = await _productRepo.GetProductsByCategoryAsync(1);
+            const int FuelCategoryId = 2;
+            var fuelProducts = await _productRepository.GetProductsByCategoryAsync(FuelCategoryId);
             return Ok(fuelProducts);
         }
 
         // GET: api/products/lube-products
         [HttpGet("lube-products")]
-        public async Task<IActionResult> GetLubeProducts()
+        public async Task<IActionResult> GetLubeProductsAsync()
         {
-            var lubeProducts = await _productRepo.GetProductsByCategoryAsync(2);
+            const int LubeCategoryId = 1;
+            var lubeProducts = await _productRepository.GetProductsByCategoryAsync(LubeCategoryId);
             return Ok(lubeProducts);
         }
 
-        // POST: api/products/add
+        // POST: api/products/add-product
         [HttpPost("add-product")]
-        public async Task<IActionResult> AddProduct([FromBody] List<ProductViewModel> productVms)
+        public async Task<IActionResult> AddProductsAsync([FromBody] List<ProductViewModel> productViewModels)
         {
-            if (productVms == null || !productVms.Any())
+            if (productViewModels == null || !productViewModels.Any())
                 return BadRequest("No products provided.");
 
             var addedProducts = new List<Product>();
             var validationErrors = new List<string>();
 
-            foreach (var vm in productVms)
+            foreach (var vm in productViewModels)
             {
                 if (string.IsNullOrWhiteSpace(vm.ProductName))
                 {
-                    validationErrors.Add($"Product name is required for category: {vm.ProductCategory}");
+                    validationErrors.Add($"Product name is required for category '{vm.ProductCategory}'.");
                     continue;
                 }
 
-                // Find category by name
-                var category = await _productRepo.GetCategoryByNameAsync(vm.ProductCategory);
-
+                var category = await _productRepository.GetCategoryByNameAsync(vm.ProductCategory);
                 if (category == null)
                 {
                     validationErrors.Add($"Category '{vm.ProductCategory}' not found.");
                     continue;
                 }
 
-
-                var product = new Product
+                var productExists = await _productRepository.ProductExistsAsync(vm.ProductName.Trim());
+                if (productExists)
                 {
-                    ProductName = vm.ProductName,
-                    ProductDescription = vm.ProductDescription,
+                    validationErrors.Add($"Product '{vm.ProductName}' already exists.");
+                    continue;
+                }
+
+                var newProduct = new Product
+                {
+                    ProductName = vm.ProductName.Trim(),
+                    ProductDescription = vm.ProductDescription?.Trim(),
                     ProductCategory = category,
-                    Date = DateTime.UtcNow
+                    Date = vm.Date
                 };
 
                 try
                 {
-                    await _productRepo.AddProductAsync(product);
-                    addedProducts.Add(product);
+                    await _productRepository.AddProductAsync(newProduct);
+                    addedProducts.Add(newProduct);
                 }
                 catch (Exception ex)
                 {
@@ -100,11 +111,9 @@ namespace FuelManagementAPI.Controllers
 
             return Ok(new
             {
-                products = addedProducts,
-                errors = validationErrors
+                Products = addedProducts,
+                Errors = validationErrors
             });
         }
-
-
     }
 }

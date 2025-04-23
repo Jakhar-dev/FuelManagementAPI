@@ -12,7 +12,7 @@ namespace FuelManagementAPI.Models
         public Product Product { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
-        public decimal Amount => Quantity * Price;
+        public decimal Amount { get; set; }
 
         public int LubeEntryId { get; set; }
         public LubeEntry? LubeEntry { get; set; }

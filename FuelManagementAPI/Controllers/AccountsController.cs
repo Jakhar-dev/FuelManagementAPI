@@ -60,10 +60,18 @@ public class AccountController : ControllerBase
     }
 
     // Add Debit/Credit Transaction    
-    [HttpPost("transaction")]
-    public async Task<IActionResult> AddTransaction([FromBody] AccountTransactionViewModel model)
+    [HttpPost("transactions")] // Plural
+public async Task<IActionResult> AddTransactions([FromBody] List<AccountTransactionViewModel> models)
+{
+    if (models == null || !models.Any())
+        return BadRequest("No transactions provided.");
+
+    var results = new List<AccountTransaction>();
+
+    foreach (var model in models)
     {
-        if (model.Amount <= 0) return BadRequest("Amount must be greater than zero.");
+        if (model.Amount <= 0)
+            return BadRequest("Amount must be greater than zero.");
 
         var transaction = new AccountTransaction
         {
@@ -75,8 +83,10 @@ public class AccountController : ControllerBase
         };
 
         var addedTransaction = await _accountRepo.AddTransactionAsync(transaction);
-        return Ok(addedTransaction);
+        results.Add(addedTransaction);
     }
+    return Ok(results);
+}
 
     [HttpGet("get-transaction")]
     public async Task<ActionResult> GetAllTransaction()

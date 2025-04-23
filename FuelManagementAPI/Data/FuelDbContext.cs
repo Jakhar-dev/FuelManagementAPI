@@ -42,7 +42,8 @@ namespace FuelManagementAPI.Data
                .HasForeignKey(ls => ls.LubeEntryId);
 
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ConfigureUtcDateTime();           
         }
-    }
 
+    }
 }

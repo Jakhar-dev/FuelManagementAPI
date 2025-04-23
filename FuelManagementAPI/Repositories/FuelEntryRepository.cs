@@ -80,5 +80,12 @@ namespace FuelManagementAPI.Repositories
         {
             throw new NotImplementedException();
         }
+        public async Task<bool> SaleExistsAsync(int productId, DateTime date)
+        {
+            return await _FuelEntryContext.FuelEntries
+                .Where(e => e.Date.Date == date.Date)
+                .SelectMany(e => e.Sales)
+                .AnyAsync(s => s.ProductId == productId);
+        }
     }
 }
