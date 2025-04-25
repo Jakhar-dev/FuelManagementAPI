@@ -20,9 +20,24 @@ namespace FuelManagementAPI.Repositories
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<User> GetByEmailAsync(string email)
+        //public async Task<User> GetByEmailAsync(string email)
+        //{
+        //    return await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+        //}
+
+        public async Task<User> GetByMobileAsync(string mobile)
         {
-            return await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Mobile == mobile);
+        }
+
+        public async Task<bool> MobileExistsAsync(string mobile)
+        {
+            return await _context.Users.AnyAsync(u => u.Mobile == mobile);
+        }
+
+        public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
 
         public async Task<IEnumerable<User>> GetAllAsync()
@@ -30,10 +45,10 @@ namespace FuelManagementAPI.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<bool> EmailExistsAsync(string email)
-        {
-            return await _context.Users.AnyAsync(u => u.Email == email);
-        }
+        //public async Task<bool> EmailExistsAsync(string email)
+        //{
+        //    return await _context.Users.AnyAsync(u => u.Email == email);
+        //}
 
         public async Task<User> CreateAsync(User user)
         {

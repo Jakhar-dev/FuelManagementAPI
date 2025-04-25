@@ -1,24 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace FuelManagementAPI.Models
+public class User
 {
-    public class User
-    {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int UsersId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int UsersId { get; set; }
 
-        [Required]
-        public string Name { get; set; }
+    [Required]
+    public string Name { get; set; }
 
-        [Required, EmailAddress]
-        public string Email { get; set; }
+    [Required]
+    [Phone]
+    public string Mobile { get; set; }
 
-        [Required]
-        public string PasswordHash { get; set; } // Hashed Password
+    [Required]
+    public string PasswordHash { get; set; }
 
-        [Required]
-        public string Role { get; set; } // "admin", "manager", "staff"
-    }
+    [Required]
+    public string Role { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiry { get; set; }
+
 }

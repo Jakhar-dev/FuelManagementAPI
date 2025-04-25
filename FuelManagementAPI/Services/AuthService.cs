@@ -26,7 +26,7 @@ namespace FuelManagementAPI.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UsersId.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.MobilePhone, user.Mobile),
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
@@ -39,6 +39,11 @@ namespace FuelManagementAPI.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
         }
     }
 }

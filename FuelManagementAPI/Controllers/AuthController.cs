@@ -1,4 +1,5 @@
 ﻿using FuelManagementAPI.Models;
+using FuelManagementAPI.Models.ViewModels;
 using FuelManagementAPI.Repositories;
 using FuelManagementAPI.Repositories.IRepositories;
 using FuelManagementAPI.Services;
@@ -23,30 +24,81 @@ namespace FuelManagementAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] User user)
+        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            if (await _userRepository.EmailExistsAsync(user.Email))
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (await _userRepository.MobileExistsAsync(model.Mobile))
+                return BadRequest("Mobile number already exists.");
+
+            var user = new User
             {
-                return BadRequest("Email already exists.");
-            }
+                Name = model.Name,
+                Mobile = model.Mobile,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Role = "manager"
+            };
 
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
             await _userRepository.CreateAsync(user);
-
             return Ok(new { message = "User registered successfully!" });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] User userDto)
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            var user = await _userRepository.GetByEmailAsync(userDto.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(userDto.PasswordHash, user.PasswordHash))
-            {
-                return Unauthorized("Invalid email or password.");
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var token = _authService.GenerateJwtToken(user);
-            return Ok(new { token });
+            var user = await _userRepository.GetByMobileAsync(model.Mobile);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+                return Unauthorized("Invalid mobile number or password.");
+
+            var accessToken = _authService.GenerateJwtToken(user);
+            var refreshToken = _authService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+            await _userRepository.UpdateAsync(user);
+
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new { token = accessToken });
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized("Refresh token missing.");
+
+            var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
+            if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+                return Unauthorized("Invalid or expired refresh token.");
+
+            var newAccessToken = _authService.GenerateJwtToken(user);
+            var newRefreshToken = _authService.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+            await _userRepository.UpdateAsync(user);
+
+            Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new { token = newAccessToken });
         }
 
         [Authorize]
@@ -55,10 +107,10 @@ namespace FuelManagementAPI.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userMobile = User.FindFirst(ClaimTypes.MobilePhone)?.Value;
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            return Ok(new { userId, userName, userEmail, userRole });
+            return Ok(new { userId, userName, userMobile, userRole });
         }
     }
 }
