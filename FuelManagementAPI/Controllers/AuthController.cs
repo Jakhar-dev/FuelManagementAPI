@@ -16,11 +16,13 @@ namespace FuelManagementAPI.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly AuthService _authService;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public AuthController(IUserRepository userRepository, AuthService authService)
+        public AuthController(IUserRepository userRepository, AuthService authService, ICategoryRepository categoryRepository)
         {
             _userRepository = userRepository;
             _authService = authService;
+            _categoryRepository = categoryRepository;
         }
 
         [HttpPost("register")]
@@ -41,7 +43,14 @@ namespace FuelManagementAPI.Controllers
             };
 
             await _userRepository.CreateAsync(user);
-            return Ok(new { message = "User registered successfully!" });
+
+            var defaultCategories = new List<ProductCategory>
+            {
+                new ProductCategory { CategoryName = "Fuel", Description = "Diesel, Petrol Etc.", UsersId = user.UsersId },
+                new ProductCategory { CategoryName = "Lube", Description = "Engine oil etc.", UsersId = user.UsersId}
+            };
+            await _categoryRepository.AddCategoriesAsync(defaultCategories);
+                return Ok(new { message = "User registered successfully!" });
         }
 
         [HttpPost("login")]
@@ -69,7 +78,7 @@ namespace FuelManagementAPI.Controllers
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new { token = accessToken });
+            return Ok(new { token = accessToken, userId = user.UsersId });
         }
 
         [HttpPost("refresh-token")]

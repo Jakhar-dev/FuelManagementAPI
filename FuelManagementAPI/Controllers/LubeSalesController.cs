@@ -45,6 +45,13 @@ public class LubeSalesController : ControllerBase
         }
     }
 
+    [HttpGet("check-duplicate")]
+    public async Task<IActionResult> CheckDuplicateSale([FromQuery] int productId, [FromQuery] DateTime date)
+    {
+        var exists = await _repository.SaleExistsAsync(productId, date);
+        return Ok(new { exists });
+    }
+
     [HttpGet("all")]
     public async Task<IActionResult> GetAllLubeSales()
     {

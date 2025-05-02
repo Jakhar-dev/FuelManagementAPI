@@ -5,7 +5,11 @@ namespace FuelManagementAPI.Data
 {
     public class FuelDbContext : DbContext
     {
-        public FuelDbContext(DbContextOptions<FuelDbContext> options) : base(options) { }
+        private readonly IHttpContextAccessor _httpcontextAccessor;
+        public FuelDbContext(DbContextOptions<FuelDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options) 
+        {
+            _httpcontextAccessor = httpContextAccessor;
+        }
 
         public DbSet<User> Users { get; set; }
         public DbSet<FuelSale> FuelSales { get; set; }
@@ -21,6 +25,12 @@ namespace FuelManagementAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Product>()
+            .HasOne(p => p.ProductCategory)
+            .WithMany() // or .WithMany(c => c.Products) if you define a collection
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<FuelEntry>()
            .HasMany(fe => fe.Sales)
            .WithOne(fs => fs.FuelEntry)
@@ -44,6 +54,35 @@ namespace FuelManagementAPI.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.ConfigureUtcDateTime();           
         }
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker
+                .Entries()
+                .Where(e => e.Entity is BaseEntity &&
+                           (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+            var userIdClaim = _httpcontextAccessor.HttpContext?.User?.FindFirst("id")?.Value;
+            int.TryParse(userIdClaim, out int userId);
+
+            foreach (var entityEntry in entries)
+            {
+                if (entityEntry.Entity is BaseEntity baseEntity)
+                {
+                    if (entityEntry.State == EntityState.Added)
+                        baseEntity.CreatedDate = DateTime.UtcNow;
+                    else if (entityEntry.State == EntityState.Modified)
+                        baseEntity.ModifiedDate = DateTime.UtcNow;
+                }
+
+                if (entityEntry.Entity is UserEntity userEntity && userId > 0)
+                {
+                    userEntity.UsersId = userId;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
 
     }
 }

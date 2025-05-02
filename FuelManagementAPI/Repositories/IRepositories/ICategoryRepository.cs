@@ -10,5 +10,8 @@ namespace FuelManagementAPI.Repositories.IRepositories
         Task<ProductCategory?> GetCategoryByNameAsync(string name);
         Task<ProductCategory> AddCategoryAsync(CategoryViewModel model);
         Task<bool> CategoryExistsAsync(string categoryName);
+        Task AddCategoriesAsync(IEnumerable<ProductCategory> categories);
+
+
     }
 }

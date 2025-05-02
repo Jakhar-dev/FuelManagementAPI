@@ -48,11 +48,17 @@ namespace FuelManagementAPI.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("TotalCredit")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("TotalDebit")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("AccountId");
 
@@ -73,8 +79,14 @@ namespace FuelManagementAPI.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("timestamp with time zone");
@@ -82,6 +94,9 @@ namespace FuelManagementAPI.Migrations
                     b.Property<string>("TransactionType")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("TransactionId");
 
@@ -106,6 +121,9 @@ namespace FuelManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -114,6 +132,9 @@ namespace FuelManagementAPI.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("JoiningDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Phone")
@@ -126,6 +147,9 @@ namespace FuelManagementAPI.Migrations
 
                     b.Property<DateTime?>("TerminationDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("AttendantId");
 
@@ -140,8 +164,17 @@ namespace FuelManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FuelEntryId"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("FuelEntryId");
 
@@ -159,11 +192,17 @@ namespace FuelManagementAPI.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("CurrentReading")
                         .HasColumnType("numeric");
 
                     b.Property<int>("FuelEntryId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("PreviousReading")
                         .HasColumnType("numeric");
@@ -179,6 +218,9 @@ namespace FuelManagementAPI.Migrations
 
                     b.Property<decimal>("Testing")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("FuelSaleId");
 
@@ -197,8 +239,17 @@ namespace FuelManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LubeEntryId"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("LubeEntryId");
 
@@ -216,8 +267,14 @@ namespace FuelManagementAPI.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("LubeEntryId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -226,6 +283,9 @@ namespace FuelManagementAPI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsersId")
                         .HasColumnType("integer");
 
                     b.HasKey("LubeId");
@@ -245,17 +305,26 @@ namespace FuelManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PriceId"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("SellingPrice")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("PriceId");
 
@@ -275,7 +344,13 @@ namespace FuelManagementAPI.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ProductDescription")
@@ -287,6 +362,9 @@ namespace FuelManagementAPI.Migrations
 
                     b.Property<decimal?>("PurchasePrice")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("ProductId");
 
@@ -307,11 +385,20 @@ namespace FuelManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("CategoryId");
 
@@ -326,9 +413,15 @@ namespace FuelManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UsersId"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Mobile")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FuelManagementAPI.Models
 {
-    public class Account
+    public class Account : UserEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -25,7 +25,6 @@ namespace FuelManagementAPI.Models
 
         public string? Description { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
         public List<AccountTransaction> Transactions { get; set; } = new List<AccountTransaction>();
     }
 }

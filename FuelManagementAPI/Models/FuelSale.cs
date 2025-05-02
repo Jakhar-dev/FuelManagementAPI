@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FuelManagementAPI.Models
 {
-    public class FuelSale
+    public class FuelSale : UserEntity
     {        
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

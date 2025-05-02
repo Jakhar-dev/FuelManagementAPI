@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FuelManagementAPI.Models
 {
-    public class Product
+    public class Product : UserEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

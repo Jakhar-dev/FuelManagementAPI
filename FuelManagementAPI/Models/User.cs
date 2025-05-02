@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using FuelManagementAPI.Models;
 
-public class User
+public class User : UserEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

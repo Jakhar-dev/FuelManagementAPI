@@ -16,11 +16,34 @@ namespace FuelManagementAPI.Controllers
             _priceRepository = PriceRepository;
         }
 
+        private int GetCurrentUserId()
+        {
+            return int.TryParse(User?.FindFirst("id")?.Value, out var id) ? id : 0;
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Price>>> GetPrices()
         {
             return Ok(await _priceRepository.GetAllAsync());
         }
+
+        [HttpGet("user-prices")]
+        public async Task<IActionResult> GetUserPrices()
+        {
+            try
+            {
+                var userId = GetCurrentUserId(); // Assumes you have this helper method
+                var prices = await _priceRepository.GetPricesForCurrentUserAsync(userId);
+
+                return Ok(prices);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("🔥 Error fetching user prices: " + ex.Message);
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Price>> GetPrice(int id)

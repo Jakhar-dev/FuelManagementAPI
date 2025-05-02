@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FuelManagementAPI.Models
 {
-    public class AccountTransaction
+    public class AccountTransaction : UserEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -21,6 +21,4 @@ namespace FuelManagementAPI.Models
         public string? Description { get; set; }
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
     }
-}
-
-                                                                 
+}                                                              

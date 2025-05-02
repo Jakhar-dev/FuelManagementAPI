@@ -1,8 +1,10 @@
 ﻿using FuelManagementAPI.Models;
 using FuelManagementAPI.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+[Authorize]
 [Route("api/accounts")]
 [ApiController]
 public class AccountController : ControllerBase
@@ -61,32 +63,32 @@ public class AccountController : ControllerBase
 
     // Add Debit/Credit Transaction    
     [HttpPost("transactions")] // Plural
-public async Task<IActionResult> AddTransactions([FromBody] List<AccountTransactionViewModel> models)
-{
-    if (models == null || !models.Any())
-        return BadRequest("No transactions provided.");
-
-    var results = new List<AccountTransaction>();
-
-    foreach (var model in models)
+    public async Task<IActionResult> AddTransactions([FromBody] List<AccountTransactionViewModel> models)
     {
-        if (model.Amount <= 0)
-            return BadRequest("Amount must be greater than zero.");
+        if (models == null || !models.Any())
+            return BadRequest("No transactions provided.");
 
-        var transaction = new AccountTransaction
+        var results = new List<AccountTransaction>();
+
+        foreach (var model in models)
         {
-            AccountId = model.AccountId,
-            Amount = model.Amount,
-            TransactionType = model.TransactionType,
-            TransactionDate = model.TransactionDate,
-            Description = model.Description
-        };
+            if (model.Amount <= 0)
+                return BadRequest("Amount must be greater than zero.");
 
-        var addedTransaction = await _accountRepo.AddTransactionAsync(transaction);
-        results.Add(addedTransaction);
+            var transaction = new AccountTransaction
+            {
+                AccountId = model.AccountId,
+                Amount = model.Amount,
+                TransactionType = model.TransactionType,
+                TransactionDate = model.TransactionDate,
+                Description = model.Description
+            };
+
+            var addedTransaction = await _accountRepo.AddTransactionAsync(transaction);
+            results.Add(addedTransaction);
+        }
+        return Ok(results);
     }
-    return Ok(results);
-}
 
     [HttpGet("get-transaction")]
     public async Task<ActionResult> GetAllTransaction()

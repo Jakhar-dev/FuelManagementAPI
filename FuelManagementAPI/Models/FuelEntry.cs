@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FuelManagementAPI.Models
 {
-    public class FuelEntry
+    public class FuelEntry : UserEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

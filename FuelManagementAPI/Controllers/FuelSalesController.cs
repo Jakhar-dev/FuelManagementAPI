@@ -1,15 +1,17 @@
 ﻿using FuelManagementAPI.Models;
 using FuelManagementAPI.Repositories;
 using FuelManagementAPI.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace FuelManagementAPI.Controllers
 {
     [Route("api/fuelSales")]
     [ApiController]
     [EnableCors("AllowLocalhost")]
+    [Authorize]
     public class FuelSalesController : Controller
     {
         private readonly IFuelEntryRepository _fuelEntryRepository;
@@ -25,7 +27,7 @@ namespace FuelManagementAPI.Controllers
         public async Task<IActionResult> GetFuelSales()
         {
             try
-            {
+            {               
                 var fuelSales = await _fuelEntryRepository.GetAllAsync();
                 return Ok(fuelSales);
             }
@@ -51,7 +53,7 @@ namespace FuelManagementAPI.Controllers
         public async Task<IActionResult> AddFuelSales([FromBody] FuelEntryViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(ModelState);           
 
             try
             {
@@ -66,7 +68,7 @@ namespace FuelManagementAPI.Controllers
                         Testing = s.Testing,
                         SaleQuantity = (s.CurrentReading - s.PreviousReading - s.Testing),
                         Price = s.Price,
-                        Amount = (s.CurrentReading - s.PreviousReading - s.Testing) * s.Price
+                        Amount = (s.CurrentReading - s.PreviousReading - s.Testing) * s.Price,
                     }).ToList()
                 };
 
@@ -88,14 +90,7 @@ namespace FuelManagementAPI.Controllers
             await _fuelEntryRepository.UpdateAsync(fuelEntry);
             return NoContent();
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFuelSales(int id)
-        {
-            await _fuelEntryRepository.DeleteAsync(id);
-            return NoContent();
-        }
-
+                
         [HttpGet("check-duplicate")]
         public async Task<IActionResult> CheckDuplicateSale([FromQuery] int productId, [FromQuery] DateTime date)
         {
@@ -111,7 +106,7 @@ namespace FuelManagementAPI.Controllers
             return Ok(new { previousReading });
         }
 
-        [HttpDelete("fuel/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSingleFuelSale(int id)
         {
             var sale = await _fuelSalesRepository.GetByIdAsync(id);

@@ -3,19 +3,34 @@ using FuelManagementAPI.Models;
 using FuelManagementAPI.Repositories;
 using FuelManagementAPI.Repositories.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 public class AccountRepository : Repository<Account>, IAccountRepository
 {
     private readonly FuelDbContext _context;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AccountRepository(FuelDbContext context) : base(context)
+    public AccountRepository(FuelDbContext context, IHttpContextAccessor httpContextAccessor) : base(context)
     {
         _context = context;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    // Create New Account
-   public async Task<IEnumerable<Account>> CreateAccountsAsync(IEnumerable<Account> accounts)
+    private int GetCurrentUserId()
     {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out var id) ? id : 0;
+    }
+
+    public async Task<IEnumerable<Account>> CreateAccountsAsync(IEnumerable<Account> accounts)
+    {
+        var userId = GetCurrentUserId();
+
+        foreach (var account in accounts)
+        {
+            account.UsersId = userId;
+        }
+
         _context.Accounts.AddRange(accounts);
         await _context.SaveChangesAsync();
         return accounts;
@@ -23,27 +38,43 @@ public class AccountRepository : Repository<Account>, IAccountRepository
 
     public async Task<List<Account>> GetAllWithTransactionsAsync()
     {
+        var userId = GetCurrentUserId();
+
         return await _context.Accounts
-            .Include(a => a.Transactions) // 👈 This ensures EF loads related transactions
+            .Include(a => a.Transactions)
+            .Where(a => a.UsersId == userId)
             .ToListAsync();
     }
-    // Get All Accounts
+
     public async Task<List<Account>> GetAccountsAsync()
     {
-        return await _context.Accounts.ToListAsync();
+        var userId = GetCurrentUserId();
+
+        return await _context.Accounts
+            .Where(a => a.UsersId == userId)
+            .ToListAsync();
     }
 
-    // Find Account by ID
     public async Task<Account?> GetAccountByIdAsync(int accountId)
     {
-        return await _context.Accounts.Include(a => a.Transactions).FirstOrDefaultAsync(a => a.AccountId == accountId);
+        var userId = GetCurrentUserId();
+
+        return await _context.Accounts
+            .Include(a => a.Transactions)
+            .FirstOrDefaultAsync(a => a.AccountId == accountId && a.UsersId == userId);
     }
 
-    // Add Transaction (Debit/Credit)
     public async Task<AccountTransaction> AddTransactionAsync(AccountTransaction transaction)
     {
-        var account = await _context.Accounts.FindAsync(transaction.AccountId);
-        if (account == null) throw new Exception("Account not found!");
+        var userId = GetCurrentUserId();
+
+        var account = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.AccountId == transaction.AccountId && a.UsersId == userId);
+
+        if (account == null)
+            throw new Exception("Account not found!");
+
+        transaction.UsersId = userId;
 
         if (transaction.TransactionType == "Debit")
             account.TotalDebit += transaction.Amount;
@@ -57,8 +88,7 @@ public class AccountRepository : Repository<Account>, IAccountRepository
 
     public async Task AddMultipleTransactionsAsync(List<AccountTransaction> transactions)
     {
-        await _context.AccountTransactions.AddRangeAsync(transactions);
+        _context.AccountTransactions.AddRange(transactions);
         await _context.SaveChangesAsync();
     }
-
 }

@@ -43,9 +43,8 @@ namespace FuelManagementAPI.Controllers
         // GET: api/products/fuel-products
         [HttpGet("fuel-products")]
         public async Task<IActionResult> GetFuelProductsAsync()
-        {
-            const int FuelCategoryId = 2;
-            var fuelProducts = await _productRepository.GetProductsByCategoryAsync(FuelCategoryId);
+        {          
+            var fuelProducts = await _productRepository.GetProductsByCategoryNameAsync("Fuel");
             return Ok(fuelProducts);
         }
 
@@ -53,8 +52,7 @@ namespace FuelManagementAPI.Controllers
         [HttpGet("lube-products")]
         public async Task<IActionResult> GetLubeProductsAsync()
         {
-            const int LubeCategoryId = 1;
-            var lubeProducts = await _productRepository.GetProductsByCategoryAsync(LubeCategoryId);
+            var lubeProducts = await _productRepository.GetProductsByCategoryNameAsync("Lube");
             return Ok(lubeProducts);
         }
 

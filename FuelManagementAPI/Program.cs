@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddHttpContextAccessor();
 // Service Registrations
 builder.Services.AddScoped<DailyPriceUpdaterService>();
 builder.Services.AddHostedService<DailyBackgroundPriceUpdateService>();
