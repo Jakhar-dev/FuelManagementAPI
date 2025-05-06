@@ -47,13 +47,27 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<AuthService>();
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowLocalhost",
+//        builder => builder.WithOrigins("http://localhost:3000")
+//        .AllowAnyMethod()
+//        .AllowAnyHeader()
+//        .AllowCredentials());
+//});
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost",
-        builder => builder.WithOrigins("http://localhost:3000")
-        .AllowAnyMethod()
+    options.AddPolicy("AllowLocalAndProd", policy =>
+    {
+        policy.WithOrigins(
+            "http://localhost:3000",
+            "https://fuel-manager-wheat.vercel.app/api"
+        )
         .AllowAnyHeader()
-        .AllowCredentials());
+        .AllowCredentials()
+        .AllowAnyMethod();
+    });
 });
 
 var jwtSetting = builder.Configuration.GetSection("JwtSettings");
@@ -85,7 +99,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseCors("AllowLocalhost");
+app.UseCors("AllowLocalAndProd");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
