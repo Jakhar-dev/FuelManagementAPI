@@ -6,10 +6,10 @@ WORKDIR /app
 COPY *.sln .
 COPY FuelManagementAPI/*.csproj ./FuelManagementAPI/
 
-# Restore dependencies
+# Restore
 RUN dotnet restore
 
-# Copy the full source and build
+# Copy all source files
 COPY FuelManagementAPI/. ./FuelManagementAPI/
 WORKDIR /app/FuelManagementAPI
 RUN dotnet publish -c Release -o out
