@@ -8,9 +8,8 @@ using System.Security.Claims;
 
 namespace FuelManagementAPI.Controllers
 {
-    [Route("api/fuelSales")]
+    [Route("api/FuelSales")]
     [ApiController]
-    [EnableCors("AllowLocalhost")]
     [Authorize]
     public class FuelSalesController : Controller
     {
@@ -38,7 +37,6 @@ namespace FuelManagementAPI.Controllers
             }
         }
 
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFuelSaleById(int id)
         {
@@ -53,7 +51,7 @@ namespace FuelManagementAPI.Controllers
         public async Task<IActionResult> AddFuelSales([FromBody] FuelEntryViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);           
+                return BadRequest(ModelState);
 
             try
             {
