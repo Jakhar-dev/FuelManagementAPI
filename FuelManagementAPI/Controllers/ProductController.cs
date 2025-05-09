@@ -70,14 +70,14 @@ namespace FuelManagementAPI.Controllers
             {
                 if (string.IsNullOrWhiteSpace(vm.ProductName))
                 {
-                    validationErrors.Add($"Product name is required for category '{vm.ProductCategory}'.");
+                    validationErrors.Add($"Product name is required for category '{vm.ProductCategoryType}'.");
                     continue;
                 }
 
-                var category = await _productRepository.GetCategoryByNameAsync(vm.ProductCategory);
+                var category = await _productRepository.GetCategoryByNameAsync(vm.ProductCategoryType);
                 if (category == null)
                 {
-                    validationErrors.Add($"Category '{vm.ProductCategory}' not found.");
+                    validationErrors.Add($"Category '{vm.ProductCategoryType}' not found.");
                     continue;
                 }
 
@@ -92,8 +92,6 @@ namespace FuelManagementAPI.Controllers
                 {
                     ProductName = vm.ProductName.Trim(),
                     ProductDescription = vm.ProductDescription?.Trim(),
-                    ProductCategory = category,
-                    Date = vm.Date
                 };
 
                 try

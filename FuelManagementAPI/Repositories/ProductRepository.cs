@@ -54,12 +54,12 @@ namespace FuelManagementAPI.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByCategoryNameAsync(string categoryName)
+        public async Task<IEnumerable<Product>> GetProductsByCategoryNameAsync(string categoryTypeName)
         {
             var userId = GetCurrentUserId();
             return await _context.Products
-                .Include(p => p.ProductCategory)
-                .Where(p => p.UsersId == userId && p.ProductCategory.CategoryName.ToLower() == categoryName.ToLower())
+                .Include(p => p.ProductCategoryType)
+                .Where(p => p.UsersId == userId && p.ProductCategoryType.CategoryTypeName.ToLower() == categoryTypeName.ToLower())
                 .ToListAsync();
         }
 
@@ -67,8 +67,8 @@ namespace FuelManagementAPI.Repositories
         {
             var userId = GetCurrentUserId();
             return await _context.Products
-                .Include(p => p.ProductCategory)
-                .Where(p => p.CategoryId == categoryId && p.UsersId == userId)
+                .Include(p => p.ProductCategoryType)
+                .Where(p => p.CategoryTypeId == categoryId && p.UsersId == userId)
                 .ToListAsync();
         }
         public async Task<ProductCategory?> GetCategoryByNameAsync(string categoryName)

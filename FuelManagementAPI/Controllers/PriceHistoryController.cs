@@ -7,11 +7,11 @@ namespace FuelManagementAPI.Controllers
 {
     [Route("api/price")]
     [ApiController]
-    public class PriceController : Controller
+    public class PriceHistoryController : Controller
     {
-        private readonly IPriceRepository _priceRepository;
+        private readonly IPriceHistoryRepository _priceRepository;
 
-        public PriceController(IPriceRepository PriceRepository)
+        public PriceHistoryController(IPriceHistoryRepository PriceRepository)
         {
             _priceRepository = PriceRepository;
         }
@@ -22,7 +22,7 @@ namespace FuelManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Price>>> GetPrices()
+        public async Task<ActionResult<IEnumerable<PriceHistory>>> GetPrices()
         {
             return Ok(await _priceRepository.GetAllAsync());
         }
@@ -46,11 +46,11 @@ namespace FuelManagementAPI.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Price>> GetPrice(int id)
+        public async Task<ActionResult<PriceHistory>> GetPrice(int id)
         {
             var Price = await _priceRepository.GetByIdAsync(id);
             if (Price == null) return NotFound();
-            return Ok(new {sellingPrice = Price.SellingPrice});
+            return Ok(new {sellingPrice = Price.Price});
         }
 
         [HttpGet("price-by-product-and-date")]
@@ -63,7 +63,7 @@ namespace FuelManagementAPI.Controllers
                 if (price == null)
                     return Ok(new { sellingPrice = 0 }); // Instead of NotFound
 
-                return Ok(new { sellingPrice = price.SellingPrice });
+                return Ok(new { Price = price.Price });
             }
             catch (Exception ex)
             {
@@ -74,14 +74,14 @@ namespace FuelManagementAPI.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> AddPrice(Price Price)
+        public async Task<ActionResult> AddPrice(PriceHistory Price)
         {
             await _priceRepository.AddAsync(Price);
             return CreatedAtAction(nameof(GetPrice), new { id = Price.PriceId }, Price);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdatePrice(int id, Price Price)
+        public async Task<ActionResult> UpdatePrice(int id, PriceHistory Price)
         {
             if (id != Price.PriceId) return BadRequest();
             await _priceRepository.UpdateAsync(Price);

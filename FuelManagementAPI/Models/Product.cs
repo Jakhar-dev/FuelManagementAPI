@@ -9,14 +9,16 @@ namespace FuelManagementAPI.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }
-        [Required]
-        [ForeignKey("ProductCategory")]
-        public int CategoryId { get; set; }
-        public ProductCategory ProductCategory { get; set; }
-        [Required]
+        [Required]        
         public string ProductName { get; set; }
-        public decimal? PurchasePrice { get; set; }
         public string? ProductDescription { get; set; }
-        public DateTime Date {  get; set; }
+
+        public int CategoryTypeId { get; set; }
+        public ProductCategoryType ProductCategoryType { get; set; }
+
+        public ICollection<FuelSale> FuelSales { get; set; }
+        public ICollection<LubeSale> LubeSales { get; set; }
+        public ICollection<Purchase> Purchases { get; set; }
+
     }
 }

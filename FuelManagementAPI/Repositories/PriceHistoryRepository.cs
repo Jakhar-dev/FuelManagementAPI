@@ -7,12 +7,12 @@ using System.Security.Claims;
 
 namespace FuelManagementAPI.Repositories
 {
-    public class PriceRepository : Repository<Price>, IPriceRepository
+    public class PriceHistoryRepository : Repository<PriceHistory>, IPriceHistoryRepository
     {
         private readonly FuelDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PriceRepository(FuelDbContext context, IHttpContextAccessor httpContextAccessor) : base(context) 
+        public PriceHistoryRepository(FuelDbContext context, IHttpContextAccessor httpContextAccessor) : base(context) 
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -24,43 +24,43 @@ namespace FuelManagementAPI.Repositories
             return int.TryParse(userIdClaim, out var id) ? id : 0;
         }
        
-        public async Task Add(Price price)
+        public async Task Add(PriceHistory price)
         {
             price.UsersId = GetCurrentUserId();
-            await _context.Prices.AddAsync(price);
+            await _context.PriceHistory.AddAsync(price);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Price>> GetPricesForCurrentUserAsync(int userId)
+        public async Task<List<PriceHistory>> GetPricesForCurrentUserAsync(int userId)
         {
-            return await _context.Prices
+            return await _context.PriceHistory
                 .Include(p => p.Product)
                 .Where(p => p.UsersId == userId)
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
         }
 
-        public Price Delete(int id)
+        public PriceHistory Delete(int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Price> GetByIdAsync(int id)
+        public async Task<PriceHistory> GetByIdAsync(int id)
         {
             var userId = GetCurrentUserId();
-            return await _context.Prices.FirstOrDefaultAsync(p => p.PriceId == id && p.UsersId == userId);
+            return await _context.PriceHistory.FirstOrDefaultAsync(p => p.PriceId == id && p.UsersId == userId);
         }
 
-        public async Task<Price> GetLatestPriceForProductBeforeDate(int productId, DateTime date)
+        public async Task<PriceHistory> GetLatestPriceForProductBeforeDate(int productId, DateTime date)
         {
             var userId = GetCurrentUserId();
-            return await _context.Prices
+            return await _context.PriceHistory
                 .Where(p => p.ProductId == productId && p.Date != null && p.Date <= date && p.UsersId == userId)
                 .OrderByDescending(p => p.Date)
                 .FirstOrDefaultAsync();
         }
 
-        public Price Update(Price price)
+        public PriceHistory Update(PriceHistory price)
         {
             throw new NotImplementedException();
         }
@@ -72,7 +72,7 @@ namespace FuelManagementAPI.Repositories
                 var submittedProductIds = model.Products.Select(p => p.ProductId).ToList();
 
                 // Step 1: Remove existing prices for submitted products on the same date (user-specific)
-                var existingPrices = await _context.Prices
+                var existingPrices = await _context.PriceHistory
                     .Where(p => submittedProductIds.Contains(p.ProductId) &&
                                 p.Date.Date == model.Date.Date &&
                                 p.UsersId == userId)
@@ -80,23 +80,23 @@ namespace FuelManagementAPI.Repositories
 
                 if (existingPrices.Any())
                 {
-                    _context.Prices.RemoveRange(existingPrices);
+                    _context.PriceHistory.RemoveRange(existingPrices);
                 }
 
                 // Step 2: Save new prices for submitted products (assign UsersId)
-                var submittedPriceEntries = model.Products.Select(p => new Price
+                var submittedPriceEntries = model.Products.Select(p => new PriceHistory
                 {
                     ProductId = p.ProductId,
-                    SellingPrice = p.Price,
+                    Price = p.Price,
                     Date = model.Date,
                     UsersId = userId
                 }).ToList();
 
-                await _context.Prices.AddRangeAsync(submittedPriceEntries);
+                await _context.PriceHistory.AddRangeAsync(submittedPriceEntries);
 
                 // Step 3: Autofill prices for other products in the same category that weren’t submitted
                 var allProductIdsInCategory = await _context.Products
-                    .Where(p => p.CategoryId == model.CategoryId)
+                    .Where(p => p.CategoryTypeId == model.CategoryId)
                     .Select(p => p.ProductId)
                     .ToListAsync();
 
@@ -104,7 +104,7 @@ namespace FuelManagementAPI.Repositories
 
                 if (missingProductIds.Any())
                 {
-                    var lastKnownPrices = await _context.Prices
+                    var lastKnownPrices = await _context.PriceHistory
                         .Where(p => missingProductIds.Contains(p.ProductId) &&
                                     p.Date < model.Date &&
                                     p.UsersId == userId)
@@ -112,15 +112,15 @@ namespace FuelManagementAPI.Repositories
                         .Select(g => g.OrderByDescending(p => p.Date).FirstOrDefault())
                         .ToListAsync();
 
-                    var autoFilledPrices = lastKnownPrices.Select(p => new Price
+                    var autoFilledPrices = lastKnownPrices.Select(p => new PriceHistory
                     {
                         ProductId = p.ProductId,
-                        SellingPrice = p.SellingPrice,
+                        Price = p.Price,
                         Date = model.Date,
                         UsersId = userId
                     });
 
-                    await _context.Prices.AddRangeAsync(autoFilledPrices);
+                    await _context.PriceHistory.AddRangeAsync(autoFilledPrices);
                 }
 
                 await _context.SaveChangesAsync();

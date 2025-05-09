@@ -19,7 +19,7 @@ namespace FuelManagementAPI.Services
             var yesterday = today.AddDays(-1);
 
             var allProductIds = await _context.Products.Select(p => p.ProductId).ToListAsync();
-            var productsWithTodayPrice = await _context.Prices
+            var productsWithTodayPrice = await _context.PriceHistory
                 .Where(p => p.Date == today)
                 .Select(p => p.ProductId)
                 .ToListAsync();
@@ -28,21 +28,21 @@ namespace FuelManagementAPI.Services
 
             if (!missingProducts.Any()) return;
 
-            var yesterdaysPrices = await _context.Prices
+            var yesterdaysPrices = await _context.PriceHistory
                 .Where(p => missingProducts.Contains(p.ProductId) && p.Date == yesterday)
                 .ToListAsync();
 
             if (!yesterdaysPrices.Any()) return;
 
-            var todayPrices = yesterdaysPrices.Select(p => new Price
+            var todayPrices = yesterdaysPrices.Select(p => new PriceHistory
             {
                 ProductId = p.ProductId,
-                SellingPrice = p.SellingPrice,
+                Price = p.Price,
                 Date = today,
                 Description = "Auto-copied from yesterday"
             }).ToList();
 
-            await _context.Prices.AddRangeAsync(todayPrices);
+            await _context.PriceHistory.AddRangeAsync(todayPrices);
             await _context.SaveChangesAsync();
         }
     }

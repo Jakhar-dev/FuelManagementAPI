@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FuelManagementAPI.Models
 {
-    public class Price : UserEntity
+    public class PriceHistory : UserEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -13,7 +13,16 @@ namespace FuelManagementAPI.Models
         [ForeignKey("Product")]
         public int ProductId { get; set; }
         public Product Product {  get; set; }
-        public decimal SellingPrice { get; set; }
-        public string? Description { get; set; }
+        public PriceType PriceType {  get; set; }
+        public decimal Price { get; set; }
+        public string Description { get; set; }
     }
+
+    public enum PriceType
+    {
+        Sale,
+        Purchase
+    }
+
 }
+
