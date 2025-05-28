@@ -9,7 +9,7 @@ namespace FuelManagementAPI.Repositories.IRepositories
         PriceHistory Delete(int id);
         Task Add(PriceHistory price);
         Task<bool> UpdateProductPricesAsync(PriceUpdateViewModel model);
-        Task<PriceHistory> GetLatestPriceForProductBeforeDate(int productId, DateTime date);
+        Task<PriceHistory> GetPriceForProductByDate(int productId, DateTime date);
         Task<List<PriceHistory>> GetPricesForCurrentUserAsync(int userId);
 
     }

@@ -1,5 +1,6 @@
 ﻿using FuelManagementAPI.Models;
 using FuelManagementAPI.Repositories.IRepositories;
+using FuelManagementAPI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,14 @@ public class AccountController : ControllerBase
         {
             return StatusCode(500, new { message = "An error occurred while fetching accounts", error = ex.Message });
         }
-    }   
+    }
+
+    [HttpGet("ledger")]
+    public async Task<ActionResult<IEnumerable<CustomerLedgerViewModel>>> GetCustomerLedger()
+    {
+        var result = await _accountRepo.GetCustomerLedgerAsync();
+        return Ok(result);
+    }
 
     // Get Account By ID
     [HttpGet("{accountId}")]

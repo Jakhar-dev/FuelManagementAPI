@@ -62,6 +62,19 @@ namespace FuelManagementAPI.Repositories
                 .Where(p => p.UsersId == userId && p.ProductCategoryType.CategoryTypeName.ToLower() == categoryTypeName.ToLower())
                 .ToListAsync();
         }
+        public async Task<ProductCategoryType> GetCategoryByIdAsync(int id)
+        {
+            return await _context.ProductCategoriesType.FindAsync(id);
+        }
+        public async Task<IEnumerable<Product>> GetProductsByCategoryTypeIdAsync(int categoryTypeId)
+        {
+            var userId = GetCurrentUserId();
+            return await _context.Products
+                .Include(p => p.ProductCategoryType)
+                .Where(p => p.UsersId == userId && p.CategoryTypeId == categoryTypeId)
+                .ToListAsync();
+        }
+
 
         public async Task<List<Product>> GetProductsByCategoryAsync(int categoryId)
         {
@@ -86,6 +99,55 @@ namespace FuelManagementAPI.Repositories
 
             return await _context.Products
                 .AnyAsync(p => p.ProductName.ToLower() == productName.Trim().ToLower() && p.UsersId == userId);
-        }        
+        }
+
+        public async Task<List<SalesChartViewModel>> GetSalesChartByProductAsync(string range, int? categoryId, int? productId)
+        {
+            var userId = GetCurrentUserId();
+            DateTime fromDate = range switch
+            {
+                "day" => DateTime.UtcNow.Date.AddDays(-7),
+                "month" => DateTime.UtcNow.Date.AddMonths(-6),
+                "quarter" => DateTime.UtcNow.Date.AddMonths(-12),
+                "year" => DateTime.UtcNow.Date.AddYears(-3),
+                _ => DateTime.UtcNow.Date.AddDays(-7),
+            };
+
+            var fuelSalesQuery = _context.FuelSales
+                .Where(f => f.UsersId == userId && f.FuelEntry.Date >= fromDate)
+                .Where(f => !productId.HasValue || f.ProductId == productId)
+                .Where(f => !categoryId.HasValue || f.Product.ProductCategoryType.CategoryId == categoryId)
+                .Select(f => new { f.FuelEntry.Date, f.Amount, f.Product.ProductName });
+
+            var lubeSalesQuery = _context.LubeSales
+                .Where(l => l.UsersId == userId && l.LubeEntry.Date >= fromDate)
+                .Where(l => !productId.HasValue || l.ProductId == productId)
+                .Where(l => !categoryId.HasValue || l.Product.ProductCategoryType.CategoryId == categoryId)
+                .Select(l => new { l.LubeEntry.Date, l.Amount, l.Product.ProductName });
+
+            var combined = await fuelSalesQuery.Concat(lubeSalesQuery).ToListAsync();
+
+            var grouped = combined
+                .GroupBy(x => new
+                {
+                    Product = x.ProductName,
+                    Period = range switch
+                    {
+                        "month" => x.Date.ToString("yyyy-MM"),
+                        "quarter" => $"{x.Date.Year}-Q{(x.Date.Month - 1) / 3 + 1}",
+                        "year" => x.Date.Year.ToString(),
+                        _ => x.Date.ToString("yyyy-MM-dd")
+                    }
+                })
+                .Select(g => new SalesChartViewModel
+                {
+                    Product = g.Key.Product,
+                    Period = g.Key.Period,
+                    Total = g.Sum(x => x.Amount)
+                })
+                .ToList();
+
+            return grouped;
+        }
     }
 }

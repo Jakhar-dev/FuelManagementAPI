@@ -54,7 +54,7 @@ namespace FuelManagementAPI.Data
 
             modelBuilder.Entity<FuelSale>()
                 .HasOne(fs => fs.Product)
-                .WithMany()
+                .WithMany(fs => fs.FuelSales)
                 .HasForeignKey(fs => fs.ProductId);
 
             modelBuilder.Entity<Account>()
@@ -68,10 +68,23 @@ namespace FuelManagementAPI.Data
                .HasForeignKey(ls => ls.LubeEntryId);
 
             modelBuilder.Entity<PriceHistory>()
+                .HasOne(p => p.ProductCategoryType)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PriceHistory>()
+                .HasOne(p => p.Category)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PriceHistory>()
                 .HasOne(p => p.Product)
                 .WithMany()
                 .HasForeignKey(p => p.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
 
             base.OnModelCreating(modelBuilder);
             modelBuilder.ConfigureUtcDateTime();           

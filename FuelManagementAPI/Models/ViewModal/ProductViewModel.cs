@@ -4,7 +4,7 @@ namespace FuelManagementAPI.ViewModels
 {
     public class ProductViewModel
     {       
-        public string ProductCategoryType { get; set; }
+        public int ProductCategoryTypeId { get; set; }
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }      
     }

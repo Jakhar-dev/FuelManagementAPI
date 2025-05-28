@@ -58,12 +58,12 @@ namespace FuelManagementAPI.Controllers
         {
             try
             {
-                var price = await _priceRepository.GetLatestPriceForProductBeforeDate(productId, date);
+                var price = await _priceRepository.GetPriceForProductByDate(productId, date);
 
                 if (price == null)
-                    return Ok(new { sellingPrice = 0 }); // Instead of NotFound
+                    return NotFound(new { message = "Price not available for selected date." });
 
-                return Ok(new { Price = price.Price });
+                return Ok(new { price = price.Price });
             }
             catch (Exception ex)
             {
@@ -98,9 +98,18 @@ namespace FuelManagementAPI.Controllers
         [HttpPost("update-prices")]
         public async Task<IActionResult> UpdatePrices([FromBody] PriceUpdateViewModel model)
         {
-            if (model == null || model.CategoryId == 0 || model.Products == null || model.Products.Count == 0)
-                return BadRequest("Invalid request data.");
+            // Validate required fields
+            if (model == null ||
+                model.CategoryId <= 0 ||
+                model.CategoryTypeId <= 0 ||                 // ✅ Validate CategoryTypeId
+                string.IsNullOrWhiteSpace(model.PriceType) ||// ✅ Validate PriceType
+                model.Products == null ||
+                model.Products.Count == 0)
+            {
+                return BadRequest("Invalid request data. Ensure Category, CategoryType, PriceType, and product list are provided.");
+            }
 
+            // Ensure correct DateTimeKind
             model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
 
             try
@@ -118,6 +127,7 @@ namespace FuelManagementAPI.Controllers
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
+
 
     }
 }

@@ -51,12 +51,18 @@ namespace FuelManagementAPI.Repositories
             return await _context.PriceHistory.FirstOrDefaultAsync(p => p.PriceId == id && p.UsersId == userId);
         }
 
-        public async Task<PriceHistory> GetLatestPriceForProductBeforeDate(int productId, DateTime date)
+        public async Task<PriceHistory> GetPriceForProductByDate(int productId, DateTime date)
         {
             var userId = GetCurrentUserId();
+
+            var startDate = date.Date;
+            var endDate = startDate.AddDays(1);
             return await _context.PriceHistory
-                .Where(p => p.ProductId == productId && p.Date != null && p.Date <= date && p.UsersId == userId)
-                .OrderByDescending(p => p.Date)
+                .Where(p =>
+                p.ProductId == productId && 
+                p.Date >= startDate &&
+                p.Date < endDate &&
+                p.UsersId == userId)
                 .FirstOrDefaultAsync();
         }
 
@@ -71,11 +77,14 @@ namespace FuelManagementAPI.Repositories
                 var userId = GetCurrentUserId();
                 var submittedProductIds = model.Products.Select(p => p.ProductId).ToList();
 
-                // Step 1: Remove existing prices for submitted products on the same date (user-specific)
+                // Step 1: Remove existing prices for submitted products on the same date, user, and price type
                 var existingPrices = await _context.PriceHistory
-                    .Where(p => submittedProductIds.Contains(p.ProductId) &&
-                                p.Date.Date == model.Date.Date &&
-                                p.UsersId == userId)
+                    .Where(p =>
+                        submittedProductIds.Contains(p.ProductId) &&
+                        p.Date.Date == model.Date.Date &&
+                        p.UsersId == userId &&
+                        p.PriceType == model.PriceType &&
+                        p.CategoryTypeId == model.CategoryTypeId)
                     .ToListAsync();
 
                 if (existingPrices.Any())
@@ -83,31 +92,37 @@ namespace FuelManagementAPI.Repositories
                     _context.PriceHistory.RemoveRange(existingPrices);
                 }
 
-                // Step 2: Save new prices for submitted products (assign UsersId)
+                // Step 2: Save new prices
                 var submittedPriceEntries = model.Products.Select(p => new PriceHistory
                 {
                     ProductId = p.ProductId,
                     Price = p.Price,
                     Date = model.Date,
-                    UsersId = userId
+                    UsersId = userId,
+                    CategoryId = model.CategoryId,
+                    CategoryTypeId = model.CategoryTypeId,
+                    PriceType = model.PriceType
                 }).ToList();
 
                 await _context.PriceHistory.AddRangeAsync(submittedPriceEntries);
 
-                // Step 3: Autofill prices for other products in the same category that weren’t submitted
-                var allProductIdsInCategory = await _context.Products
-                    .Where(p => p.CategoryTypeId == model.CategoryId)
+                // Step 3: Auto-fill missing product prices from same category type
+                var allProductIdsInCategoryType = await _context.Products
+                    .Where(p => p.CategoryTypeId == model.CategoryTypeId)
                     .Select(p => p.ProductId)
                     .ToListAsync();
 
-                var missingProductIds = allProductIdsInCategory.Except(submittedProductIds).ToList();
+                var missingProductIds = allProductIdsInCategoryType.Except(submittedProductIds).ToList();
 
                 if (missingProductIds.Any())
                 {
                     var lastKnownPrices = await _context.PriceHistory
-                        .Where(p => missingProductIds.Contains(p.ProductId) &&
-                                    p.Date < model.Date &&
-                                    p.UsersId == userId)
+                        .Where(p =>
+                            missingProductIds.Contains(p.ProductId) &&
+                            p.Date < model.Date &&
+                            p.UsersId == userId &&
+                            p.PriceType == model.PriceType &&
+                            p.CategoryTypeId == model.CategoryTypeId)
                         .GroupBy(p => p.ProductId)
                         .Select(g => g.OrderByDescending(p => p.Date).FirstOrDefault())
                         .ToListAsync();
@@ -117,7 +132,10 @@ namespace FuelManagementAPI.Repositories
                         ProductId = p.ProductId,
                         Price = p.Price,
                         Date = model.Date,
-                        UsersId = userId
+                        UsersId = userId,
+                        CategoryId = p.CategoryId,
+                        CategoryTypeId = p.CategoryTypeId,
+                        PriceType = model.PriceType
                     });
 
                     await _context.PriceHistory.AddRangeAsync(autoFilledPrices);
@@ -131,6 +149,7 @@ namespace FuelManagementAPI.Repositories
                 Console.WriteLine("🔥 ERROR in UpdateProductPricesAsync: " + ex.Message);
                 throw;
             }
-        }       
+        }
+
     }
 }

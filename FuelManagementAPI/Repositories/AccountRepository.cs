@@ -2,6 +2,7 @@
 using FuelManagementAPI.Models;
 using FuelManagementAPI.Repositories;
 using FuelManagementAPI.Repositories.IRepositories;
+using FuelManagementAPI.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -21,6 +22,24 @@ public class AccountRepository : Repository<Account>, IAccountRepository
         var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out var id) ? id : 0;
     }
+    public async Task<IEnumerable<CustomerLedgerViewModel>> GetCustomerLedgerAsync()
+    {
+        var userId = GetCurrentUserId();
+
+        return await _context.Accounts
+            .Where(a => a.UsersId == userId) // ✅ Filter by user here
+            .Select(a => new CustomerLedgerViewModel
+            {
+                AccountId = a.AccountId,
+                CustomerName = a.CustomerName,
+                CustomerPhone = a.CustomerPhone,
+                TotalDebit = a.TotalDebit,
+                TotalCredit = a.TotalCredit                
+            })
+            .ToListAsync();
+    }
+
+
 
     public async Task<IEnumerable<Account>> CreateAccountsAsync(IEnumerable<Account> accounts)
     {

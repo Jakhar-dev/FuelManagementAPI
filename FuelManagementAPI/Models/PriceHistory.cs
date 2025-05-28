@@ -9,20 +9,21 @@ namespace FuelManagementAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PriceId { get; set; }
         public DateTime Date { get; set; }
+
+        public int CategoryId { get; set; }
+        public ProductCategory Category { get; set; }
+
+        public int CategoryTypeId { get; set; }
+        public ProductCategoryType ProductCategoryType { get; set; }
+
         [Required]
         [ForeignKey("Product")]
         public int ProductId { get; set; }
         public Product Product {  get; set; }
-        public PriceType PriceType {  get; set; }
+
+        public string PriceType {  get; set; }
         public decimal Price { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
-
-    public enum PriceType
-    {
-        Sale,
-        Purchase
-    }
-
 }
 
