@@ -39,8 +39,6 @@ public class AccountRepository : Repository<Account>, IAccountRepository
             .ToListAsync();
     }
 
-
-
     public async Task<IEnumerable<Account>> CreateAccountsAsync(IEnumerable<Account> accounts)
     {
         var userId = GetCurrentUserId();

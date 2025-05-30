@@ -120,6 +120,14 @@ public class AccountController : ControllerBase
         return Ok(result);
     }
 
+    //[HttpGet("AllTransaction")]
+    //public async Task<IActionResult> SearchTransactions([FromQuery] string? customerName)
+    //{
+    //    var result = await _accountRepo.GetTransactionsAsync(customerName);
+    //    return Ok(result);
+    //}
+
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTransaction(int id)
     {

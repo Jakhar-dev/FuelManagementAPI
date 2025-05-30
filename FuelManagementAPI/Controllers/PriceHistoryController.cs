@@ -1,6 +1,7 @@
 ﻿using FuelManagementAPI.Models;
 using FuelManagementAPI.Repositories;
 using FuelManagementAPI.Repositories.IRepositories;
+using FuelManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FuelManagementAPI.Controllers
@@ -127,6 +128,14 @@ namespace FuelManagementAPI.Controllers
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
+
+        [HttpPost("test-update-price")]
+        public async Task<IActionResult> TestUpdate([FromServices] DailyPriceUpdaterService service)
+        {
+            await service.UpdateDailyPricesAsync();
+            return Ok("Update completed.");
+        }
+
 
 
     }
