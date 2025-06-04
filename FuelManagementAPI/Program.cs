@@ -63,7 +63,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:3000",
-            "https://fuel-manager-wheat.vercel.app/api"
+            "https://fuel-manager-wheat.vercel.app/"
         )
         .AllowAnyHeader()
         .AllowCredentials()
@@ -117,5 +117,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/", () => "API is running!");
+app.Run($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT") ?? "8080"}");
 
-app.Run();
+//app.Run();
