@@ -42,8 +42,9 @@ builder.Services.AddScoped<IFuelSalesRepository, FuelSaleRepository>();
 builder.Services.AddScoped<ILubeEntryRepository, LubeEntryRepository>();
 builder.Services.AddScoped<ILubeSalesRepository, LubeSalesRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IPriceRepository, PriceRepository>();
+builder.Services.AddScoped<IPriceHistoryRepository, PriceHistoryRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryTypeRepository, CategoryTypeRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<AuthService>();
 
@@ -62,7 +63,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:3000",
-            "https://fuel-manager-wheat.vercel.app/api"
+            "https://fuel-manager-wheat.vercel.app/"
         )
         .AllowAnyHeader()
         .AllowCredentials()
@@ -116,5 +117,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/", () => "API is running!");
+app.Run($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT") ?? "8080"}");
 
-app.Run();
+//app.Run();

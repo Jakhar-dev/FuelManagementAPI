@@ -2,15 +2,17 @@
 {
     public class PriceUpdateViewModel
     {
-        public int CategoryId { get; set; }
         public DateTime Date { get; set; }
-
-        public List<PriceProductEntry> Products { get; set; }
+        public int CategoryId { get; set; }
+        public int CategoryTypeId { get; set; }
+        public string PriceType { get; set; } // "Sale" or "Purchase"
+        public List<ProductPriceViewModel> Products { get; set; }
     }
 
-    public class PriceProductEntry
+    public class ProductPriceViewModel
     {
         public int ProductId { get; set; }
         public decimal Price { get; set; }
     }
+        
 }

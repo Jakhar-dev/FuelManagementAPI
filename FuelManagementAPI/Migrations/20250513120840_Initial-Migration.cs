@@ -96,7 +96,6 @@ namespace FuelManagementAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CategoryName = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UsersId = table.Column<int>(type: "integer", nullable: false)
@@ -104,6 +103,22 @@ namespace FuelManagementAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductCategories", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PurchaseEntries",
+                columns: table => new
+                {
+                    PurchaseEntryId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PurchaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UsersId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseEntries", x => x.PurchaseEntryId);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,16 +168,39 @@ namespace FuelManagementAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductCategoriesType",
+                columns: table => new
+                {
+                    CategoryTypeId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CategoryTypeName = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UsersId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductCategoriesType", x => x.CategoryTypeId);
+                    table.ForeignKey(
+                        name: "FK_ProductCategoriesType_ProductCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ProductCategories",
+                        principalColumn: "CategoryId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
                     ProductId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
                     ProductName = table.Column<string>(type: "text", nullable: false),
-                    PurchasePrice = table.Column<decimal>(type: "numeric", nullable: true),
                     ProductDescription = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CategoryTypeId = table.Column<int>(type: "integer", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UsersId = table.Column<int>(type: "integer", nullable: false)
@@ -171,11 +209,11 @@ namespace FuelManagementAPI.Migrations
                 {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
                     table.ForeignKey(
-                        name: "FK_Products_ProductCategories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "ProductCategories",
-                        principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Products_ProductCategoriesType_CategoryTypeId",
+                        column: x => x.CategoryTypeId,
+                        principalTable: "ProductCategoriesType",
+                        principalColumn: "CategoryTypeId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -246,28 +284,60 @@ namespace FuelManagementAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Prices",
+                name: "PriceHistory",
                 columns: table => new
                 {
                     PriceId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    SellingPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
+                    PriceType = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UsersId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Prices", x => x.PriceId);
+                    table.PrimaryKey("PK_PriceHistory", x => x.PriceId);
                     table.ForeignKey(
-                        name: "FK_Prices_Products_ProductId",
+                        name: "FK_PriceHistory_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Purchase",
+                columns: table => new
+                {
+                    PurchaseId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
+                    PurchaseQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    PurchasePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    PurchaseEntryId = table.Column<int>(type: "integer", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UsersId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Purchase", x => x.PurchaseId);
+                    table.ForeignKey(
+                        name: "FK_Purchase_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Purchase_PurchaseEntries_PurchaseEntryId",
+                        column: x => x.PurchaseEntryId,
+                        principalTable: "PurchaseEntries",
+                        principalColumn: "PurchaseEntryId");
                 });
 
             migrationBuilder.CreateIndex(
@@ -296,14 +366,29 @@ namespace FuelManagementAPI.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Prices_ProductId",
-                table: "Prices",
+                name: "IX_PriceHistory_ProductId",
+                table: "PriceHistory",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_CategoryId",
-                table: "Products",
+                name: "IX_ProductCategoriesType_CategoryId",
+                table: "ProductCategoriesType",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CategoryTypeId",
+                table: "Products",
+                column: "CategoryTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Purchase_ProductId",
+                table: "Purchase",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Purchase_PurchaseEntryId",
+                table: "Purchase",
+                column: "PurchaseEntryId");
         }
 
         /// <inheritdoc />
@@ -322,7 +407,10 @@ namespace FuelManagementAPI.Migrations
                 name: "LubeSales");
 
             migrationBuilder.DropTable(
-                name: "Prices");
+                name: "PriceHistory");
+
+            migrationBuilder.DropTable(
+                name: "Purchase");
 
             migrationBuilder.DropTable(
                 name: "Users");
@@ -338,6 +426,12 @@ namespace FuelManagementAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "PurchaseEntries");
+
+            migrationBuilder.DropTable(
+                name: "ProductCategoriesType");
 
             migrationBuilder.DropTable(
                 name: "ProductCategories");

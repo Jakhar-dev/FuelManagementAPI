@@ -18,19 +18,35 @@ namespace FuelManagementAPI.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<AccountTransaction> AccountTransactions { get; set; }
         public DbSet<Attendant> Attendants { get; set; }
-        public DbSet<Price> Prices { get; set; }
+        public DbSet<PriceHistory> PriceHistory { get; set; }
         public DbSet<FuelEntry> FuelEntries { get; set; }
         public DbSet<Product> Products { get; set; }
-        public DbSet<ProductCategory> ProductCategories { get; set; }   
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<ProductCategoryType> ProductCategoriesType { get; set; }
+        public DbSet<Purchase> Purchase { get; set; }
+        public DbSet<PurchaseEntry> PurchaseEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ProductCategory>()
+            .HasMany(c => c.ProductCategoriesTypes)
+            .WithOne(ct => ct.productCategory)
+            .HasForeignKey(ct => ct.CategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProductCategoryType>()
+          .HasMany(ct => ct.Products)
+          .WithOne(p => p.ProductCategoryType)
+          .HasForeignKey(p => p.CategoryTypeId)
+          .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Product>()
-            .HasOne(p => p.ProductCategory)
-            .WithMany() // or .WithMany(c => c.Products) if you define a collection
-            .HasForeignKey(p => p.CategoryId)
+            .HasOne(p => p.ProductCategoryType)
+            .WithMany(c => c.Products) // or .WithMany(c => c.Products) if you define a collection
+            .HasForeignKey(p => p.CategoryTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
+            
             modelBuilder.Entity<FuelEntry>()
            .HasMany(fe => fe.Sales)
            .WithOne(fs => fs.FuelEntry)
@@ -38,7 +54,7 @@ namespace FuelManagementAPI.Data
 
             modelBuilder.Entity<FuelSale>()
                 .HasOne(fs => fs.Product)
-                .WithMany()
+                .WithMany(fs => fs.FuelSales)
                 .HasForeignKey(fs => fs.ProductId);
 
             modelBuilder.Entity<Account>()
@@ -50,6 +66,25 @@ namespace FuelManagementAPI.Data
                .HasMany(le => le.Sales)
                .WithOne(ls => ls.LubeEntry)
                .HasForeignKey(ls => ls.LubeEntryId);
+
+            modelBuilder.Entity<PriceHistory>()
+                .HasOne(p => p.ProductCategoryType)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PriceHistory>()
+                .HasOne(p => p.Category)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PriceHistory>()
+                .HasOne(p => p.Product)
+                .WithMany()
+                .HasForeignKey(p => p.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             base.OnModelCreating(modelBuilder);
             modelBuilder.ConfigureUtcDateTime();           
@@ -79,10 +114,7 @@ namespace FuelManagementAPI.Data
                     userEntity.UsersId = userId;
                 }
             }
-
             return await base.SaveChangesAsync(cancellationToken);
         }
-
-
     }
 }

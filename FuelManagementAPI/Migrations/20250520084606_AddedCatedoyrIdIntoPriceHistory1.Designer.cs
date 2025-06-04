@@ -3,6 +3,7 @@ using System;
 using FuelManagementAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FuelManagementAPI.Migrations
 {
     [DbContext(typeof(FuelDbContext))]
-    partial class FuelDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520084606_AddedCatedoyrIdIntoPriceHistory1")]
+    partial class AddedCatedoyrIdIntoPriceHistory1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -330,6 +333,9 @@ namespace FuelManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("ProductCategoryTypeCategoryTypeId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
@@ -340,7 +346,7 @@ namespace FuelManagementAPI.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CategoryTypeId");
+                    b.HasIndex("ProductCategoryTypeCategoryTypeId");
 
                     b.HasIndex("ProductId");
 
@@ -608,13 +614,13 @@ namespace FuelManagementAPI.Migrations
                     b.HasOne("FuelManagementAPI.Models.ProductCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("FuelManagementAPI.Models.ProductCategoryType", "ProductCategoryType")
                         .WithMany()
-                        .HasForeignKey("CategoryTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("ProductCategoryTypeCategoryTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("FuelManagementAPI.Models.Product", "Product")

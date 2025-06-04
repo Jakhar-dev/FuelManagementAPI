@@ -21,12 +21,12 @@ namespace FuelManagementAPI.Controllers
         public async Task<ActionResult<IEnumerable<string>>> GetProductsAsync()
         {
             var products = await _productRepository.GetProductsAsync();
-            var productNames = products
-                .Select(p => p.ProductName.Trim())
-                .Distinct()
-                .ToList();
+            //var productNames = products
+            //    .Select(p => p.ProductName.Trim())
+            //    .Distinct()
+            //    .ToList();
 
-            return Ok(productNames);
+            return Ok(products);
         }
 
         // GET: api/products/by-category?categoryId=1
@@ -39,6 +39,17 @@ namespace FuelManagementAPI.Controllers
             var products = await _productRepository.GetProductsByCategoryAsync(categoryId);
             return Ok(products);
         }
+
+        [HttpGet("getByCatgTypeId")]
+        public async Task<IActionResult> GetFuelProductsAsync([FromQuery] int categoryTypeId)
+        {
+            if (categoryTypeId <= 0)
+                return BadRequest("Invalid category type ID.");
+
+            var fuelProducts = await _productRepository.GetProductsByCategoryTypeIdAsync(categoryTypeId);
+            return Ok(fuelProducts);
+        }
+
 
         // GET: api/products/fuel-products
         [HttpGet("fuel-products")]
@@ -70,14 +81,14 @@ namespace FuelManagementAPI.Controllers
             {
                 if (string.IsNullOrWhiteSpace(vm.ProductName))
                 {
-                    validationErrors.Add($"Product name is required for category '{vm.ProductCategory}'.");
+                    validationErrors.Add($"Product name is required for category '{vm.ProductCategoryTypeId}'.");
                     continue;
                 }
 
-                var category = await _productRepository.GetCategoryByNameAsync(vm.ProductCategory);
+                var category = await _productRepository.GetCategoryByIdAsync(vm.ProductCategoryTypeId);
                 if (category == null)
                 {
-                    validationErrors.Add($"Category '{vm.ProductCategory}' not found.");
+                    validationErrors.Add($"Category '{vm.ProductCategoryTypeId}' not found.");
                     continue;
                 }
 
@@ -92,8 +103,7 @@ namespace FuelManagementAPI.Controllers
                 {
                     ProductName = vm.ProductName.Trim(),
                     ProductDescription = vm.ProductDescription?.Trim(),
-                    ProductCategory = category,
-                    Date = vm.Date
+                    CategoryTypeId = vm.ProductCategoryTypeId
                 };
 
                 try
@@ -113,5 +123,17 @@ namespace FuelManagementAPI.Controllers
                 Errors = validationErrors
             });
         }
+
+        [HttpGet("Sales-chart-by-product")]
+        public async Task<IActionResult> GetSalesChartByProduct(
+            [FromQuery] string range = "day",
+            [FromQuery] int? categoryId = null,
+            [FromQuery] int? productId = null)
+                {
+                  
+                    var result = await _productRepository.GetSalesChartByProductAsync(range, categoryId, productId);
+                    return Ok(result);
+        }
+
     }
 }

@@ -11,6 +11,6 @@ namespace FuelManagementAPI.Models
         [Required]
         public string CategoryName { get; set; }
         public string? Description { get; set; }
-        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public ICollection<ProductCategoryType> ProductCategoriesTypes { get; set; }
     }
 }
