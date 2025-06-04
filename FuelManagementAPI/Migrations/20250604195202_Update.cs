@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FuelManagementAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Update : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -290,10 +290,12 @@ namespace FuelManagementAPI.Migrations
                     PriceId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    CategoryTypeId = table.Column<int>(type: "integer", nullable: false),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    PriceType = table.Column<int>(type: "integer", nullable: false),
+                    PriceType = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UsersId = table.Column<int>(type: "integer", nullable: false)
@@ -301,6 +303,18 @@ namespace FuelManagementAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PriceHistory", x => x.PriceId);
+                    table.ForeignKey(
+                        name: "FK_PriceHistory_ProductCategoriesType_CategoryTypeId",
+                        column: x => x.CategoryTypeId,
+                        principalTable: "ProductCategoriesType",
+                        principalColumn: "CategoryTypeId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PriceHistory_ProductCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ProductCategories",
+                        principalColumn: "CategoryId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PriceHistory_Products_ProductId",
                         column: x => x.ProductId,
@@ -364,6 +378,16 @@ namespace FuelManagementAPI.Migrations
                 name: "IX_LubeSales_ProductId",
                 table: "LubeSales",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PriceHistory_CategoryId",
+                table: "PriceHistory",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PriceHistory_CategoryTypeId",
+                table: "PriceHistory",
+                column: "CategoryTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PriceHistory_ProductId",

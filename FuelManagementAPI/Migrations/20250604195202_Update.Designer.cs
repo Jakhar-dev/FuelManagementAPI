@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FuelManagementAPI.Migrations
 {
     [DbContext(typeof(FuelDbContext))]
-    [Migration("20250513120840_Initial-Migration")]
-    partial class InitialMigration
+    [Migration("20250604195202_Update")]
+    partial class Update
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -308,6 +308,12 @@ namespace FuelManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PriceId"));
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CategoryTypeId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -315,7 +321,6 @@ namespace FuelManagementAPI.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -324,8 +329,9 @@ namespace FuelManagementAPI.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("PriceType")
-                        .HasColumnType("integer");
+                    b.Property<string>("PriceType")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
@@ -334,6 +340,10 @@ namespace FuelManagementAPI.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("PriceId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CategoryTypeId");
 
                     b.HasIndex("ProductId");
 
@@ -598,13 +608,29 @@ namespace FuelManagementAPI.Migrations
 
             modelBuilder.Entity("FuelManagementAPI.Models.PriceHistory", b =>
                 {
+                    b.HasOne("FuelManagementAPI.Models.ProductCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FuelManagementAPI.Models.ProductCategoryType", "ProductCategoryType")
+                        .WithMany()
+                        .HasForeignKey("CategoryTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FuelManagementAPI.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Category");
+
                     b.Navigation("Product");
+
+                    b.Navigation("ProductCategoryType");
                 });
 
             modelBuilder.Entity("FuelManagementAPI.Models.Product", b =>
