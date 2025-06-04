@@ -118,6 +118,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/", () => "API is running!");
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FuelDbContext>();
+    db.Database.Migrate();
+}
+
 app.Run($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT") ?? "8080"}");
 
 //app.Run();
