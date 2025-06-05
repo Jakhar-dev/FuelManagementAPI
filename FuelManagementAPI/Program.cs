@@ -63,7 +63,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:3000",
-            "https://fuel-manager-wheat.vercel.app/"
+            "https://fuel-manager-wheat.vercel.app"
         )
         .AllowAnyHeader()
         .AllowCredentials()
