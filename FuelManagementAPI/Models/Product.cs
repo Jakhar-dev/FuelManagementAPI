@@ -18,7 +18,7 @@ namespace FuelManagementAPI.Models
 
         public ICollection<FuelSale> FuelSales { get; set; }
         public ICollection<LubeSale> LubeSales { get; set; }
-        public ICollection<Purchase> Purchases { get; set; }
+        public ICollection<LubePurchase> LubePurchases { get; set; }
 
     }
 }

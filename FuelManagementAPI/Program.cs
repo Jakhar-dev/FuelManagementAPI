@@ -46,6 +46,9 @@ builder.Services.AddScoped<IPriceHistoryRepository, PriceHistoryRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryTypeRepository, CategoryTypeRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IFuelPurchaseRepository, FuelPurchaseRepository>();
+builder.Services.AddScoped<ILubePurchaseRepository, LubePurchaseRepository>();
+
 builder.Services.AddScoped<AuthService>();
 
 //builder.Services.AddCors(options =>
@@ -119,12 +122,12 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/", () => "API is running!");
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<FuelDbContext>();
-    db.Database.Migrate();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<FuelDbContext>();
+//    db.Database.Migrate();
+//}
 
-app.Run($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT") ?? "8080"}");
+//app.Run($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT") ?? "8080"}");
 
-//app.Run();
+app.Run();

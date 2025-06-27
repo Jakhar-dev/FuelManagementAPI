@@ -3,6 +3,7 @@ using System;
 using FuelManagementAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FuelManagementAPI.Migrations
 {
     [DbContext(typeof(FuelDbContext))]
-    partial class FuelDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250626094723_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,40 +184,6 @@ namespace FuelManagementAPI.Migrations
                     b.ToTable("FuelEntries");
                 });
 
-            modelBuilder.Entity("FuelManagementAPI.Models.FuelPurchase", b =>
-                {
-                    b.Property<int>("FuelPurchaseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FuelPurchaseId"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("CategoryTypeId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("PurchaseQuantity")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("FuelPurchaseId");
-
-                    b.HasIndex("CategoryTypeId");
-
-                    b.ToTable("FuelPurchase");
-                });
-
             modelBuilder.Entity("FuelManagementAPI.Models.FuelSale", b =>
                 {
                     b.Property<int>("FuelSaleId")
@@ -288,59 +257,6 @@ namespace FuelManagementAPI.Migrations
                     b.HasKey("LubeEntryId");
 
                     b.ToTable("LubeEntries");
-                });
-
-            modelBuilder.Entity("FuelManagementAPI.Models.LubePurchase", b =>
-                {
-                    b.Property<int>("PurchaseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PurchaseId"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ProductCategoryTypeId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ProductId1")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("PurchaseQuantity")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PurchaseId");
-
-                    b.HasIndex("ProductCategoryTypeId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductId1");
-
-                    b.ToTable("LubePurchase");
                 });
 
             modelBuilder.Entity("FuelManagementAPI.Models.LubeSale", b =>
@@ -534,6 +450,81 @@ namespace FuelManagementAPI.Migrations
                     b.ToTable("ProductCategoriesType");
                 });
 
+            modelBuilder.Entity("FuelManagementAPI.Models.Purchase", b =>
+                {
+                    b.Property<int>("PurchaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PurchaseId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ProductCategoryTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PurchaseEntryId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PurchaseQuantity")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PurchaseId");
+
+                    b.HasIndex("ProductCategoryTypeId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseEntryId");
+
+                    b.ToTable("Purchase");
+                });
+
+            modelBuilder.Entity("FuelManagementAPI.Models.PurchaseEntry", b =>
+                {
+                    b.Property<int>("PurchaseEntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PurchaseEntryId"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PurchaseEntryId");
+
+                    b.ToTable("PurchaseEntries");
+                });
+
             modelBuilder.Entity("User", b =>
                 {
                     b.Property<int>("UsersId")
@@ -586,17 +577,6 @@ namespace FuelManagementAPI.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("FuelManagementAPI.Models.FuelPurchase", b =>
-                {
-                    b.HasOne("FuelManagementAPI.Models.ProductCategoryType", "CategoryType")
-                        .WithMany()
-                        .HasForeignKey("CategoryTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CategoryType");
-                });
-
             modelBuilder.Entity("FuelManagementAPI.Models.FuelSale", b =>
                 {
                     b.HasOne("FuelManagementAPI.Models.FuelEntry", "FuelEntry")
@@ -614,29 +594,6 @@ namespace FuelManagementAPI.Migrations
                     b.Navigation("FuelEntry");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("FuelManagementAPI.Models.LubePurchase", b =>
-                {
-                    b.HasOne("FuelManagementAPI.Models.ProductCategoryType", "ProductCategoryType")
-                        .WithMany()
-                        .HasForeignKey("ProductCategoryTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FuelManagementAPI.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("FuelManagementAPI.Models.Product", null)
-                        .WithMany("LubePurchases")
-                        .HasForeignKey("ProductId1");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ProductCategoryType");
                 });
 
             modelBuilder.Entity("FuelManagementAPI.Models.LubeSale", b =>
@@ -707,6 +664,33 @@ namespace FuelManagementAPI.Migrations
                     b.Navigation("productCategory");
                 });
 
+            modelBuilder.Entity("FuelManagementAPI.Models.Purchase", b =>
+                {
+                    b.HasOne("FuelManagementAPI.Models.ProductCategoryType", "ProductCategoryType")
+                        .WithMany()
+                        .HasForeignKey("ProductCategoryTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FuelManagementAPI.Models.Product", "Product")
+                        .WithMany("Purchases")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FuelManagementAPI.Models.PurchaseEntry", "PurchaseEntry")
+                        .WithMany("Purchases")
+                        .HasForeignKey("PurchaseEntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductCategoryType");
+
+                    b.Navigation("PurchaseEntry");
+                });
+
             modelBuilder.Entity("FuelManagementAPI.Models.Account", b =>
                 {
                     b.Navigation("Transactions");
@@ -726,9 +710,9 @@ namespace FuelManagementAPI.Migrations
                 {
                     b.Navigation("FuelSales");
 
-                    b.Navigation("LubePurchases");
-
                     b.Navigation("LubeSales");
+
+                    b.Navigation("Purchases");
                 });
 
             modelBuilder.Entity("FuelManagementAPI.Models.ProductCategory", b =>
@@ -739,6 +723,11 @@ namespace FuelManagementAPI.Migrations
             modelBuilder.Entity("FuelManagementAPI.Models.ProductCategoryType", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("FuelManagementAPI.Models.PurchaseEntry", b =>
+                {
+                    b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618
         }

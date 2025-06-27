@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FuelManagementAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Update : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -329,11 +329,13 @@ namespace FuelManagementAPI.Migrations
                 {
                     PurchaseId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductCategoryTypeId = table.Column<int>(type: "integer", nullable: false),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
                     PurchaseQuantity = table.Column<decimal>(type: "numeric", nullable: false),
                     PurchasePrice = table.Column<decimal>(type: "numeric", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    PurchaseEntryId = table.Column<int>(type: "integer", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    PurchaseEntryId = table.Column<int>(type: "integer", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UsersId = table.Column<int>(type: "integer", nullable: false)
@@ -341,6 +343,12 @@ namespace FuelManagementAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Purchase", x => x.PurchaseId);
+                    table.ForeignKey(
+                        name: "FK_Purchase_ProductCategoriesType_ProductCategoryTypeId",
+                        column: x => x.ProductCategoryTypeId,
+                        principalTable: "ProductCategoriesType",
+                        principalColumn: "CategoryTypeId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Purchase_Products_ProductId",
                         column: x => x.ProductId,
@@ -351,7 +359,8 @@ namespace FuelManagementAPI.Migrations
                         name: "FK_Purchase_PurchaseEntries_PurchaseEntryId",
                         column: x => x.PurchaseEntryId,
                         principalTable: "PurchaseEntries",
-                        principalColumn: "PurchaseEntryId");
+                        principalColumn: "PurchaseEntryId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -403,6 +412,11 @@ namespace FuelManagementAPI.Migrations
                 name: "IX_Products_CategoryTypeId",
                 table: "Products",
                 column: "CategoryTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Purchase_ProductCategoryTypeId",
+                table: "Purchase",
+                column: "ProductCategoryTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Purchase_ProductId",

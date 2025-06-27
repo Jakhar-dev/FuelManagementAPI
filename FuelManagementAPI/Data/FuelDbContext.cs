@@ -23,8 +23,8 @@ namespace FuelManagementAPI.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductCategory> ProductCategories { get; set; }
         public DbSet<ProductCategoryType> ProductCategoriesType { get; set; }
-        public DbSet<Purchase> Purchase { get; set; }
-        public DbSet<PurchaseEntry> PurchaseEntries { get; set; }
+        public DbSet<LubePurchase> LubePurchase { get; set; }
+        public DbSet<FuelPurchase> FuelPurchase { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,6 +83,19 @@ namespace FuelManagementAPI.Data
                 .HasOne(p => p.Product)
                 .WithMany()
                 .HasForeignKey(p => p.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FuelPurchase>()
+                .HasOne(fp => fp.CategoryType) // navigation property to CategoryType
+                .WithMany()                    // CategoryType does not have collection of purchases
+                .HasForeignKey(fp => fp.CategoryTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LubePurchase>()
+                .HasOne(lp => lp.Product)      // navigation property to Product
+                .WithMany()                    // Product does not have collection of lube purchases
+                .HasForeignKey(lp => lp.ProductCategoryTypeId)
+                .HasForeignKey(lp => lp.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 
